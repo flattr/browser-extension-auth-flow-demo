@@ -1,0 +1,32 @@
+{
+  "name": "Flattr auth flow demo",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "All the auth, half the price!",
+  "homepage_url": "https://flattr.com",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "background": {
+    "scripts": [
+      "src/bg/background.js"
+    ],
+    "persistent": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "src/inject/inject.js"
+      ]
+    }
+  ],
+  "permissions": [
+    "storage",
+    "tabs"
+  ]
+}
