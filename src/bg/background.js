@@ -32,7 +32,7 @@ chrome.storage.local.get(
   [storageKey],
   result => {
     if (!result[storageKey]) {
-    openAuthTab()
+      openAuthTab()
     }
   }
 )
