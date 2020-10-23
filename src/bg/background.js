@@ -2,10 +2,6 @@
 
 const storageKey = 'auth'
 
-function openAuthTab () {
-  chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
-}
-
 function onToken (request, sender, sendResponse) {
   if (!request) return
 
@@ -28,12 +24,4 @@ function onToken (request, sender, sendResponse) {
   return true
 }
 
-chrome.storage.local.get(
-  [storageKey],
-  result => {
-    if (!result[storageKey]) {
-      openAuthTab()
-    }
-  }
-)
 chrome.runtime.onMessage.addListener(onToken)

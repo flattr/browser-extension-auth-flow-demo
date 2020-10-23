@@ -18,6 +18,7 @@ document.addEventListener('flattr-token', event => {
     { accessToken, subscription },
     ({ authenticated }) => {
       dispatchEvent('authenticated', { authenticated })
+      chrome.runtime.sendMessage({ authenticated })
     }
   )
 })
