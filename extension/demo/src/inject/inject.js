@@ -15,9 +15,17 @@ document.addEventListener('flattr-trigger', event => {
 document.addEventListener('flattr-token', event => {
   let { accessToken, subscription } = event.detail
   chrome.runtime.sendMessage(
-    { accessToken, subscription },
+    { type: 'token', accessToken, subscription },
     ({ authenticated }) => {
       dispatchEvent('authenticated', { authenticated })
     }
+  )
+})
+
+document.addEventListener('flattr-subscription', event => {
+  let { subscription } = event.detail
+  chrome.runtime.sendMessage(
+    { type: 'subscription', subscription },
+
   )
 })
