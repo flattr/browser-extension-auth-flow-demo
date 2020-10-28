@@ -13,20 +13,20 @@ TODO: describe
 
 The access token must be added to the request header.
 
-	Authorization: Bearer 8843d7f92416211de9ebb963ff4ce28125932878
+    Authorization: Bearer 8843d7f92416211de9ebb963ff4ce28125932878
 
 Example:
 
-	curl \
-	  -H "Accept: application/json" \
-	  -H "Authorization: Bearer {token}"
+    curl \
+      -H "Accept: application/json" \
+      -H "Authorization: Bearer {token}"
 
 ## fetching the subscription status of the authenticated user
 
 
-	curl \
-	  -H "Accept: application/json" \
-	  https://api.flattr.com/rest/v2/subscription-status
+    curl \
+      -H "Accept: application/json" \
+      https://api.flattr.com/rest/v2/subscription-status
 
 Fetching this endpoint will return an object with the authenticated user's subscription status. The returned JSON has 3 parts, paying, expires_at and payload.
 
@@ -35,22 +35,24 @@ Fetching this endpoint will return an object with the authenticated user's subsc
 * payload: a cryptographically signed and encoded string intended to be shared with third parties.
 
 **Response**
-	
-	HTTP/1.1 200 OK
-	Content-Type: application/json;charset=utf-8
-	
-	{
-	  "paying": true,
-     "expires_at": 1603888902,
-	  "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWOQXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
-	}
-	
+
+    HTTP/1.1 200 OK
+    Content-Type: application/json;charset=utf-8
+
+    {
+      "isPaying": true,
+      "expiresAt": 1603888902,
+      "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWOQXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
+    }
+
 A user with no active subscription returns a slightly less populated result.
 
-	HTTP/1.1 200 OK
-	Content-Type: application/json;charset=utf-8
+    HTTP/1.1 200 OK
+    Content-Type: application/json;charset=utf-8
 
-	{
-	  "paying": false
-	}
-	
+    {
+      "isPaying": false,
+      "expiresAt": null,
+      "payload": null
+    }
+
