@@ -25,3 +25,8 @@ body {
   border-radius: 9999px;
   padding: .5rem 1rem;
 }
+
+.link {
+  color: #2779bd;
+  text-decoration: underline;
+}

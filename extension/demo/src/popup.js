@@ -4,6 +4,7 @@ const storageKey = 'auth'
 
 const button = document.getElementById('auth-button')
 const message = document.getElementById('auth-message')
+const link = document.getElementById('manage-link')
 
 function init () {
   chrome.runtime.onMessage.addListener(
@@ -50,6 +51,13 @@ function openAuthTab () {
   })
 }
 
+function openAppsTab () {
+  chrome.tabs.create({
+    url: 'https://flattr.com/apps',
+    active: true
+  })
+}
+
 function showMessage () {
   message.style.display = 'block'
   button.style.display = 'none'
@@ -61,5 +69,6 @@ function showButton () {
 }
 
 button.addEventListener('click', triggerAuth)
+link.addEventListener('click', openAppsTab)
 
 init()
