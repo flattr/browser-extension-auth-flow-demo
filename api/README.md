@@ -19,3 +19,10 @@ Fetching this endpoint will return an object with the authenticated user's subsc
      "expires_at": 1603888902,
 	  "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWOQXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
 	}
+	
+A user with no active subscription returns a slightly less populated result.
+
+	{
+	  "paying": false
+	}
+	
