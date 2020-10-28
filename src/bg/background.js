@@ -6,10 +6,8 @@ function openAuthTab () {
   chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
 }
 
-function onToken (request, sender, sendResponse) {
-  if (!request) return
-
-  const { accessToken, subscription } = request
+function onToken (data, sender, sendResponse) {
+  const { accessToken, subscription } = data
   if (accessToken && subscription) {
     let payload = {}
     payload[storageKey] = {
@@ -18,7 +16,6 @@ function onToken (request, sender, sendResponse) {
         subscription: subscription
       }
     }
-    console.log(payload)
     chrome.storage.local.set(payload, () => {
       sendResponse({ authenticated: !chrome.runtime.lastError })
     })
@@ -36,4 +33,18 @@ chrome.storage.local.get(
     }
   }
 )
-chrome.runtime.onMessage.addListener(onToken)
+
+function onSubscriptionChange (data, sender, sendResponse) {
+  const { subscription } = data
+
+}
+
+function onMessage (request, sender, sendResponse) {
+  if (!request) return
+
+  const { type, data } = request
+  if (type === 'token' && data) onToken(data, sender, sendResponse)
+  if (type === 'subscription' && data) onSubscriptionChange(data, sender, sendResponse)
+}
+
+chrome.runtime.onMessage.addListener(onMessage)
