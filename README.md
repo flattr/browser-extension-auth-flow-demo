@@ -1,2 +1,5 @@
 # browser-extension-auth-flow-demo
-Demonstration extension for auth flow setup
+
+1. Backend/API/Server
+2. Extension
+3. Website/Client
