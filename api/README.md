@@ -21,7 +21,7 @@ Example:
       -H "Accept: application/json" \
       -H "Authorization: Bearer {token}"
 
-## fetching the subscription status of the authenticated user
+## Fetching the subscription status of the authenticated user
 
 
     curl \
@@ -55,4 +55,3 @@ A user with no active subscription returns a slightly less populated result.
       "expiresAt": null,
       "payload": null
     }
-
