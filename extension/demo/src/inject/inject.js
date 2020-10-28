@@ -6,6 +6,18 @@ function dispatchEvent (name, data = {}) {
   )
 }
 
+function sendMessage (type, data, callback) {
+  const payload = {
+    type: type,
+    data: data
+  }
+  chrome.runtime.sendMessage(payload, callback)
+}
+
+function onAuthenticated ({ authenticated }) {
+  dispatchEvent('authenticated', { authenticated })
+}
+
 document.addEventListener('flattr-trigger', event => {
   if (event.detail.action !== 'authentication') return
 
@@ -13,19 +25,11 @@ document.addEventListener('flattr-trigger', event => {
 })
 
 document.addEventListener('flattr-token', event => {
-  let { accessToken, subscription } = event.detail
-  chrome.runtime.sendMessage(
-    { type: 'token', accessToken, subscription },
-    ({ authenticated }) => {
-      dispatchEvent('authenticated', { authenticated })
-    }
-  )
+  const { accessToken, subscription } = event.detail
+  sendMessage('token', { accessToken, subscription }, onAuthenticated)
 })
 
 document.addEventListener('flattr-subscription', event => {
   let { subscription } = event.detail
-  chrome.runtime.sendMessage(
-    { type: 'subscription', subscription },
-
-  )
+  sendMessage('subscription', { type: 'subscription', subscription })
 })
