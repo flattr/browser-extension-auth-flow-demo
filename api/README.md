@@ -4,7 +4,9 @@ WIP: Include info about how it works here.
 ## fetching the subscription status of the authenticated user
 
 
-> Endpoint: GET /subscription-status
+	curl \
+	  -H "Accept: application/json" \
+	  https://api.flattr.com/rest/v2/subscription-status
 
 Fetching this endpoint will return an object with the authenticated user's subscription status. The returned JSON has 3 parts, paying, expires_at and payload.
 
@@ -13,7 +15,10 @@ Fetching this endpoint will return an object with the authenticated user's subsc
 * payload: a cryptographically signed and encoded string intended to be shared with third parties.
 
 **Response**
-
+	
+	HTTP/1.1 200 OK
+	Content-Type: application/json;charset=utf-8
+	
 	{
 	  "paying": true,
      "expires_at": 1603888902,
@@ -21,6 +26,9 @@ Fetching this endpoint will return an object with the authenticated user's subsc
 	}
 	
 A user with no active subscription returns a slightly less populated result.
+
+	HTTP/1.1 200 OK
+	Content-Type: application/json;charset=utf-8
 
 	{
 	  "paying": false
