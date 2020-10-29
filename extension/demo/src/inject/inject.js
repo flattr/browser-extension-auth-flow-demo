@@ -21,3 +21,7 @@ document.addEventListener('flattr-token', event => {
     }
   )
 })
+
+const FlattrExt = {
+  isPayingUser: () => sendMessage('payload-request', {}, payload => payload)
+}
