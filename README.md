@@ -1,7 +1,7 @@
 # Documentation and demo for an example Flattr Extension
 
 This repository aims to describe how Flattr could be integrated
-in an extension in order for the extension to be able to relay to websites
+into an extension in order for the extension to be able to relay to websites
 whether or not the browsing user is a paying Flattr user.
 
 The 3 parts involved in this are: The Flattr website([flattr.com](https://flattr.com)) and API, the
