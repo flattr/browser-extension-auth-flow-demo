@@ -11,4 +11,4 @@ The documentation will focus on each part separately and try to explain how they
 
 1. [Flattr website and API](api/README.md)
 2. [Extension](extension/README.md)
-3. [Website/Client](client/README.md)
+3. [Publisher website](publisher-website/README.md)
