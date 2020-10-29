@@ -33,3 +33,7 @@ document.addEventListener('flattr-subscription', event => {
   let { subscription } = event.detail
   sendMessage('subscription', { type: 'subscription', subscription })
 })
+
+const FlattrExt = {
+  isPayingUser: () => sendMessage('payload-request', {}, payload => payload)
+}
