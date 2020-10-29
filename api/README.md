@@ -31,7 +31,7 @@ Fetching this endpoint will return an object with the authenticated user's subsc
 
 * `isPaying`: a boolean value that is true when the user has an active subscription.
 * `expiresAt`: The time at which this payload will have to be renewed. The extension should make sure to update this payload shortly after the expire time.
-* `payload`: a cryptographically signed and encoded string intended to be shared with third parties. The [payload](../client/README.md) is described in detail in the [client documentation](../client/README.md).
+* `payload`: a cryptographically signed and encoded string intended to be shared with third parties. The [payload](../publisher-website/README.md) is described in detail in the [client documentation](../publisher-website/README.md).
 
 **Response**
 
