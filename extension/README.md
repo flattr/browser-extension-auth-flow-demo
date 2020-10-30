@@ -1,3 +1,5 @@
+> This is a WIP and it's likely that the FlattrExt API will change before if goes live.
+
 # Extension demo
 Demonstration extension for auth flow setup
 
@@ -29,15 +31,4 @@ A successful `flattr-token` payload will look like this:
 ```
 
 ## FlattrExt API
-The extension exposes the FlattrExt object for payload requests
-
-```js
-if (FlattrExt !== undefined) {
-  const payload = await FlattrExt.isPayingUser()
-  
-  // Decode payload logic here
-}
-```
-
-## Success!
-![Success kid](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.hKY8epH2DA0lUc8jRqUQmgHaEK%26pid%3DApi&f=1)
+The extension provides access to a [payload](../publisher-website/README.md#payload) that can be used to verify that the visitor is a paying Flattr user.
