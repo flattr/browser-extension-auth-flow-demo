@@ -29,7 +29,15 @@ A successful `flattr-token` payload will look like this:
 ```
 
 ## FlattrExt API
+The extension exposes the FlattrExt object for payload requests
 
-Text text
+```js
+if (FlattrExt !== undefined) {
+  const payload = await FlattrExt.isPayingUser()
+  
+  // Decode payload logic here
+}
+```
 
 ## Success!
+![Success kid](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Ftse1.mm.bing.net%2Fth%3Fid%3DOIP.hKY8epH2DA0lUc8jRqUQmgHaEK%26pid%3DApi&f=1)
