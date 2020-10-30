@@ -1,4 +1,8 @@
+
 # Publisher website
+
+> Note that the certificates used for signing will likely change before this goes live.
+
 ## Checking if the visitor is a paying Flattr user
 
 The visiting extension will expose an api endpoint if there is an active user, calling it will instantly return a [payload](#payload) to be validated.
