@@ -6,10 +6,6 @@
 
 Authentication is required in order to gain access to private data, for this we use OAuth 2. OAuth 2 relies on separate standards for the access tokens - we currently use Bearer tokens which are the simplest and most widespread token type.
 
-### Getting a token
-
-TODO: describe
-
 ### Including the access token in requests
 
 The access token must be added to the request header.
