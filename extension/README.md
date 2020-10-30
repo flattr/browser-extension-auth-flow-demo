@@ -35,9 +35,9 @@ A successful `flattr-token` payload will look like this:
 ```json5
 {
   accessToken: 'abc123',
-  subscription: {		
-     active: true		
-   }
+  subscription: {
+    active: true
+  }
 }
 ```
 
