@@ -26,7 +26,7 @@ document.addEventListener('flattr-token', event => {
   // Save data in event.detail.payload
 
   // Emit response
-  document.dispatchEvent(new CustomEvent('flattr-authenticated'))
+  document.dispatchEvent(new CustomEvent('flattr-authenticated', { detail: { authenticated: true } }))
 })
 ```
 
