@@ -35,6 +35,8 @@ Example JSON data could be:
 	  "expiresAt": 1603885771
 	}
 
+`expiresAt` specifies when the payload expires as a unix timestamp.
+
 The JSON object is then base64 encoded to form the first part of the payload.
 
 #### 2. Signature
