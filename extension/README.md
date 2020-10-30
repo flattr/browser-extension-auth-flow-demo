@@ -51,5 +51,12 @@ A successful `flattr-token` payload will look like this:
 }
 ```
 
+### Fetching the subscription status
+
+The payload delivered with the `flattr-token` event contains information
+about the authenticated users subscription status. A user with an active subscription will have `subscription: { active: true } }` in the payload as well as an `accessToken`.
+
+The extension should then continue to fetch the shareable subscription status payload from the [API](../api/README.md).
+
 ## FlattrExt API
 The extension provides access to a [payload](../publisher-website/README.md#payload) that can be used to verify that the visitor is a paying Flattr user.
