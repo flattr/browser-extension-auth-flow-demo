@@ -1,5 +1,6 @@
 # Client demo
-WIP: Include info about how it works here.
+
+> Note that the certificates used for signing will likely change before this goes live.
 
 ## Checking if the visitor is a paying Flattr user
 
