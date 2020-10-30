@@ -5,7 +5,7 @@ Demonstration extension for auth flow setup
 
 ## Token acquisition
 
-![Auth flow chart](https://github.com/flattr/browser-extension-auth-flow-documentation/blob/main/assets/auth-flow.png?raw=true "Auth flow chart")
+![Auth flow chart](assets/auth-flow.png?raw=true "Auth flow chart")
 
 1. The extension opens `https://flattr.com/oauth/ext` in the browser
 2. The user is guided through the auth flow for creating the token
@@ -13,14 +13,24 @@ Demonstration extension for auth flow setup
 4. The extension stores the included payload from the `flattr-token` event
 
 ### Payload example
-Token event example:
+Auth flow example:
 
-From page
+Flattr emit
+```js
+document.dispatchEvent(new CustomEvent('flattr-trigger'))
+```
+
+Extension emit
+```js
+document.dispatchEvent(new CustomEvent('flattr-authenticate'))
+```
+
+Flattr emit
 ```js
 document.dispatchEvent(new CustomEvent('flattr-token', { detail: payload }))
 ```
 
-In extension
+Extension handle then emit
 ```js
 document.addEventListener('flattr-token', event => { 
   // Save data in event.detail.payload
