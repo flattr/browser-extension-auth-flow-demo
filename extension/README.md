@@ -3,8 +3,7 @@ Demonstration extension for auth flow setup
 
 ## Token acquisition
 
-![Auth flow chart](browser-extension-auth-flow-documentation
-/assets/auth-flow.png?raw=true "Auth flow chart")
+![Auth flow chart](browser-extension-auth-flow-documentation/assets/auth-flow.png?raw=true "Auth flow chart")
 
 1. The extension opens `https://flattr.com/oauth/ext` in the browser
 2. The user is guided through the auth flow for creating the token
