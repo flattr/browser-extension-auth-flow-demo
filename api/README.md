@@ -1,5 +1,7 @@
 # API
 
+> This is a WIP and it's likely that the API URL will change before this goes live.
+
 ## Authorization
 
 Authentication is required in order to gain access to private data, for this we use OAuth 2. OAuth 2 relies on separate standards for the access tokens - we currently use Bearer tokens which are the simplest and most widespread token type.
