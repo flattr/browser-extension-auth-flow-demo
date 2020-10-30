@@ -13,13 +13,24 @@ Demonstration extension for auth flow setup
 4. The extension stores the included payload from the `flattr-token` event
 
 ### Payload example
-Event handling example:
+Token event example:
+
+From page
 ```js
-document.addEventListener('event-name', event => { 
-  // handle event.detail.payload
-})
-document.dispatchEvent(new CustomEvent('event-name', { detail: payload }))
+document.dispatchEvent(new CustomEvent('flattr-token', { detail: payload }))
 ```
+
+In extension
+```js
+document.addEventListener('flattr-token', event => { 
+  // Save data in event.detail.payload
+
+  // Emit response
+  document.dispatchEvent(new CustomEvent('flattr-authenticated'))
+})
+```
+
+
 A successful `flattr-token` payload will look like this:
 ```json5
 {
