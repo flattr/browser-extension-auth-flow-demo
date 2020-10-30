@@ -7,37 +7,86 @@ Demonstration extension for auth flow setup
 
 ![Auth flow chart](https://github.com/flattr/browser-extension-auth-flow-documentation/blob/main/assets/auth-flow.png?raw=true "Auth flow chart")
 
-1. The extension opens `https://flattr.com/oauth/ext` in the browser
-2. The user is guided through the auth flow for creating the token
-3. The auth page emits `flattr-token` once accepted
-4. The extension stores the included payload from the `flattr-token` event
+### Step-by-step
+#### 1. Initiate authentication process
+The extension initiates the authentication process (if the extension is not already authenticated) by opening flattr.com/oauth/ext in a new browser tab. Ideally triggered by a button in the extension popup.
 
-### Payload example
-Token event example:
-
-From page
-```js
-document.dispatchEvent(new CustomEvent('flattr-token', { detail: payload }))
+```javascript
+// Background script
+chrome.storage.local.get(
+  [storageKey],
+  result => {
+    if (!result[storageKey]) {
+      chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
+    }
+  }
+)
 ```
 
-In extension
-```js
-document.addEventListener('flattr-token', event => { 
-  // Save data in event.detail.payload
+#### 2. User accepts authentication prompt
+User has accepted the prompt, website sends the event `flattr-trigger`. The event payload (`event.detail`) looks like this:
+```javascript
+{
+  action: 'authentication'
+}
+```
 
-  // Emit response
-  document.dispatchEvent(new CustomEvent('flattr-authenticated', { detail: { authenticated: true } }))
+The extension then acknowledges this and responds with the event `flattr-authenticate` to ask the website to initiate the request.
+
+```javascript
+// Content script
+document.addEventListener('flattr-trigger', event => {
+  if (event.detail.action !== 'authentication') return
+  // No data needs to be sent here so we can send a regular `Event`
+  document.dispatchEvent(
+    new Event('flattr-authenticate')
+  )
 })
 ```
 
+#### 3. Authentication request is sent
+The website initiates the actual authentication request and sends the `flattr-token` event to the extension if the request is successful.
 
-A successful `flattr-token` payload will look like this:
-```json5
+The payload for this event (`event.detail`) looks like this:
+
+```javascript
 {
-  accessToken: 'abc123',
+  accessToken: 'xyz', // Access token to be saved by the extension
   subscription: {
-    active: true
+    active: true // Whether the user has an active Flattr subscription (is a paying user)
   }
+}
+```
+
+Lastly, the extension responds with the event `flattr-authenticated`. The event payload here should indicate whether the authentication has worked correctly and the token has been saved.
+
+```javascript
+// Content script
+document.addEventListener('flattr-token', event => {
+  const { accessToken, subscription } = event.detail
+  saveToken({ accessToken, subscription }, data => {
+    document.dispatchEvent(
+      new CustomEvent('flattr-token', { detail: data })
+    )
+  })
+})
+
+// Background script
+function saveToken (data, sendResponse) {
+  const { accessToken, subscription } = data
+  let payload = {}
+  payload[storageKey] = {
+    auth: {
+      accessToken: accessToken,
+      subscription: subscription
+    }
+  }
+  chrome.storage.local.set(payload, () => {
+    sendResponse({ authenticated: !chrome.runtime.lastError })
+  })
+
+  // keeps message port open until set storage triggers sendResponse()
+  return true
 }
 ```
 
