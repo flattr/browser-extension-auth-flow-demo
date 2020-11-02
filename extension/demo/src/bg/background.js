@@ -1,7 +1,7 @@
 'use strict'
 
-import * as api from './modules/api'
-import * as keys from './modules/keys'
+import * as api from './modules/api.js'
+import * as keys from './modules/keys.js'
 
 function openAuthTab () {
   chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
