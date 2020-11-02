@@ -39,7 +39,7 @@ function init () {
     result => {
       if (!result[keys.auth]) {
         openAuthTab()
-      } else {
+      } else if (result[keys.payload]) {
         setTimeout(updatePayload, timeToLive(result.payload.expiresAt))
       }
     }
