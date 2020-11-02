@@ -1,2 +1,3 @@
 export const payload = 'payload'
-export const auth = 'auth'
+export const accessToken = 'accessToken'
+export const subscription = 'subscription'

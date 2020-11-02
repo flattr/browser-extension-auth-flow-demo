@@ -9,13 +9,9 @@ function openAuthTab () {
 
 function onToken (data, sendResponse) {
   const { accessToken, subscription } = data
-  let payload = {}
-  payload[keys.auth] = {
-    accessToken: accessToken,
-    subscription: subscription
-  }
-  chrome.storage.local.set(payload, () => {
+  chrome.storage.local.set({ accessToken, subscription }, () => {
     sendResponse({ authenticated: !chrome.runtime.lastError })
+    updatePayload()
   })
 
   // keeps message port open until set storage triggers sendResponse()
@@ -26,23 +22,36 @@ function timeToLive (expiresAt) {
   return expiresAt - (Date.now() + 3600)
 }
 
-async function updatePayload () {
-  const payload = await api.fetchPayload()
-  if (payload) { // fetch return might need to go through .json()?
-    storage.store(keys.payload, payload)
-  }
+function updatePayload () {
+  return // this code does not work yet
+
+  chrome.storage.local.get(keys.payload, result => {
+    if (!result[keys.payload]) {
+      api.fetchPayload().then(payload => {
+        if (payload) { // fetch return might need to go through .json()?
+          // todo: create storage module
+          // storage.add(keys.payload, payload)
+          let data = {}
+          data[keys.payload] = payload
+          chrome.storage.local.set(data)
+        }
+      })
+    }  else {
+      setTimeout(updatePayload, timeToLive(result[keys.payload].expiresAt))
+    }
+  })
+
 }
 
 function init () {
   chrome.storage.local.get(
-    [keys.auth],
+    [keys.accessToken],
     result => {
-      if (!result[keys.auth]) {
+      console.log(result)
+      if (!result[keys.accessToken]) {
         openAuthTab()
-      } else if (result[keys.payload]) {
-        setTimeout(updatePayload, timeToLive(result[keys.payload].expiresAt))
       } else {
-        api.fetchPayload(result[keys.auth].accessToken)
+        updatePayload()
       }
     }
   )
@@ -50,15 +59,7 @@ function init () {
 
 function onSubscriptionChange (data) {
   const { subscription } = data
-  let payload = {}
-  payload[keys.auth]['subscription'] = subscription
-  chrome.storage.local.set(payload, () => {
-    chrome.storage.local.get([storageKey], result => {
-      console.log(result)
-    })
-  })
-
-  return true
+  chrome.storage.local.set(subscription)
 }
 
 function onMessage (request, sender, sendResponse) {
