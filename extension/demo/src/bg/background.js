@@ -37,6 +37,8 @@ function init () {
   chrome.storage.local.get(
     [keys.auth],
     result => {
+      if (!result) return
+
       if (!result[keys.auth]) {
         openAuthTab()
       } else {
