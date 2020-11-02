@@ -40,7 +40,9 @@ function init () {
       if (!result[keys.auth]) {
         openAuthTab()
       } else if (result[keys.payload]) {
-        setTimeout(updatePayload, timeToLive(result.payload.expiresAt))
+        setTimeout(updatePayload, timeToLive(result[keys.payload].expiresAt))
+      } else {
+        api.fetchPayload(result[keys.auth].accessToken)
       }
     }
   )
