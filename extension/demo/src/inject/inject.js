@@ -1,9 +1,15 @@
 'use strict'
 
+import { sendMessage } from '../modules/messaging'
+
 function dispatchEvent (name, data = {}) {
   document.dispatchEvent(
     new CustomEvent(`flattr-${name}`, { detail: data })
   )
+}
+
+function onAuthenticated ({ authenticated }) {
+  dispatchEvent('authenticated', { authenticated })
 }
 
 document.addEventListener('flattr-trigger', event => {
@@ -13,12 +19,15 @@ document.addEventListener('flattr-trigger', event => {
 })
 
 document.addEventListener('flattr-token', event => {
-  let { accessToken, subscription } = event.detail
-  chrome.runtime.sendMessage(
-    { accessToken, subscription },
-    ({ authenticated }) => {
-      dispatchEvent('authenticated', { authenticated })
-      chrome.runtime.sendMessage({ authenticated })
-    }
-  )
+  const { accessToken, subscription } = event.detail
+  sendMessage('token', { accessToken, subscription }, onAuthenticated)
 })
+
+document.addEventListener('flattr-subscription', event => {
+  let { subscription } = event.detail
+  sendMessage('subscription', { type: 'subscription', subscription })
+})
+
+const FlattrExt = {
+  isPayingUser: () => sendMessage('payload-request', {}, payload => payload)
+}

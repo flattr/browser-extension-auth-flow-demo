@@ -1,74 +1,32 @@
 'use strict'
 
-const storageKey = 'auth'
+import { addListener, sendMessage } from './modules/messaging'
 
 const button = document.getElementById('auth-button')
 const message = document.getElementById('auth-message')
 const link = document.getElementById('manage-link')
 
-function init () {
-  chrome.runtime.onMessage.addListener(
-    function (request) {
-      if (!request || !request.hasOwnProperty(authenticated)) return
-  
-      const { authenticated } = request
-  
-      if (authenticated) {
-        showMessage()
-      } else {
-        showButton()
-      }
-    }
-  )
-
-  chrome.storage.local.get(
-    [storageKey],
-    result => {
-      if (!result[storageKey]) {
-        showButton()
-      } else {
-        showMessage()
-      }
-    }
-  )
+function onButtonClick () {
+  sendMessage('popup-trigger-auth')
 }
 
-function triggerAuth () {
-  chrome.storage.local.get(
-    [storageKey],
-    result => {
-      if (!result[storageKey]) {
-        openAuthTab()
-      }
-    }
-  )
+function onLinkClick (event) {
+  event.preventDefault()
+  sendMessage('popup-open-apps')
 }
 
-function openAuthTab () {
-  chrome.tabs.create({
-    url: 'https://flattr.com/oauth/ext',
-    active: true
-  })
+function setView ({ isAuthenticated = false }) {
+  if (!isAuthenticated) {
+    button.style.display = 'block'
+    message.style.display = 'none'
+  } else {
+    message.style.display = 'block'
+    button.style.display = 'none'
+  }
 }
 
-function openAppsTab () {
-  chrome.tabs.create({
-    url: 'https://flattr.com/apps',
-    active: true
-  })
-}
+button.addEventListener('click', onButtonClick)
+link.addEventListener('click', onLinkClick)
 
-function showMessage () {
-  message.style.display = 'block'
-  button.style.display = 'none'
-}
-
-function showButton () {
-  button.style.display = 'block'
-  message.style.display = 'none'
-}
-
-button.addEventListener('click', triggerAuth)
-link.addEventListener('click', openAppsTab)
-
-init()
+addListener('popup-set-view', setView)
+sendMessage('popup-check-auth')
