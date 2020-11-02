@@ -8,15 +8,17 @@ Demonstration extension for auth flow setup
 ![Auth flow chart](assets/auth-flow.png?raw=true "Auth flow chart")
 
 ### Step-by-step
+> These examples are abbreviated for readability. A fully working example can be found in the [extension demo](./demo).
+
 #### 1. Initiate authentication process
 The extension initiates the authentication process (if the extension is not already authenticated) by opening flattr.com/oauth/ext in a new browser tab. Ideally triggered by a button in the extension popup.
 
 ```javascript
 // Background script
 chrome.storage.local.get(
-  [storageKey],
+  'accessToken',
   result => {
-    if (!result[storageKey]) {
+    if (!result) {
       chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
     }
   }
@@ -64,30 +66,20 @@ Lastly, the extension responds with the event `flattr-authenticated`. The event 
 // Content script
 document.addEventListener('flattr-token', event => {
   const { accessToken, subscription } = event.detail
-  saveToken({ accessToken, subscription }, data => {
+  
+  chrome.storage.local.set({
+    accessToken,
+    subscription
+  }, () => {
     document.dispatchEvent(
-      new CustomEvent('flattr-token', { detail: data })
+      new CustomEvent('flattr-authenticated', {
+        detail: {
+          authenticated: !chrome.runtime.lastError
+        }
+      })
     )
   })
 })
-
-// Background script
-function saveToken (data, sendResponse) {
-  const { accessToken, subscription } = data
-  let payload = {}
-  payload[storageKey] = {
-    auth: {
-      accessToken: accessToken,
-      subscription: subscription
-    }
-  }
-  chrome.storage.local.set(payload, () => {
-    sendResponse({ authenticated: !chrome.runtime.lastError })
-  })
-
-  // keeps message port open until set storage triggers sendResponse()
-  return true
-}
 ```
 ### Fetching the subscription status
 
