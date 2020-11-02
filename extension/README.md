@@ -8,7 +8,7 @@ Demonstration extension for auth flow setup
 ![Auth flow chart](assets/auth-flow.png?raw=true "Auth flow chart")
 
 ### Step-by-step
-> These examples are abbreviated for readability. A fully working example can be found in the [demo extension](./demo)
+> These examples are abbreviated for readability. A fully working example can be found in the [extension demo](./demo).
 
 #### 1. Initiate authentication process
 The extension initiates the authentication process (if the extension is not already authenticated) by opening flattr.com/oauth/ext in a new browser tab. Ideally triggered by a button in the extension popup.
