@@ -6,10 +6,6 @@
 
 Authentication is required in order to gain access to private data, for this we use OAuth 2. OAuth 2 relies on separate standards for the access tokens - we currently use Bearer tokens which are the simplest and most widespread token type.
 
-### Getting a token
-
-TODO: describe
-
 ### Including the access token in requests
 
 The access token must be added to the request header.
@@ -32,7 +28,7 @@ Example:
 Fetching this endpoint will return an object with the authenticated user's subscription status. The returned JSON has 3 parts, paying, expires_at and payload.
 
 * `isPaying`: a boolean value that is true when the user has an active subscription.
-* `expiresAt`: The time at which this payload will have to be renewed. The extension should make sure to update this payload shortly after the expire time.
+* `expiresAt`: The time, as a unix timestamp, at which this payload will have to be renewed. The extension should make sure to update this payload shortly after the expire time.
 * `payload`: a cryptographically signed and encoded string intended to be shared with third parties. The [payload](../publisher-website/README.md) is described in detail in the [client documentation](../publisher-website/README.md).
 
 **Response**
