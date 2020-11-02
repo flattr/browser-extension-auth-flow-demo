@@ -37,11 +37,9 @@ function init () {
   chrome.storage.local.get(
     [keys.auth],
     result => {
-      if (!result) return
-
       if (!result[keys.auth]) {
         openAuthTab()
-      } else {
+      } else if (result[keys.payload]) {
         setTimeout(updatePayload, timeToLive(result.payload.expiresAt))
       }
     }
