@@ -10,9 +10,8 @@
     "128": "icons/icon128.png"
   },
   "background": {
-    "page": [
-      "src/bg/background.html"
-    ],
+    "page":
+      "src/bg/background.html",
     "persistent": true
   },
   "content_scripts": [
