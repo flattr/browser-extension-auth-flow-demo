@@ -1,21 +1,15 @@
 'use strict'
 
+import { sendMessage } from '../modules/messaging'
+
 function dispatchEvent (name, data = {}) {
   document.dispatchEvent(
     new CustomEvent(`flattr-${name}`, { detail: data })
   )
 }
 
-function sendMessage (type, data, callback) {
-  const payload = {
-    type: type,
-    data: data
-  }
-  chrome.runtime.sendMessage(payload, callback)
-}
-
-function onAuthenticated ({ authenticated }) {
-  dispatchEvent('authenticated', { authenticated })
+function onAuthenticated ({ isAuthenticated }) {
+  dispatchEvent('authenticated', { authenticated: isAuthenticated })
 }
 
 document.addEventListener('flattr-trigger', event => {

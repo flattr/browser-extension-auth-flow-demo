@@ -1,58 +1,66 @@
 'use strict'
 
-const storageKey = 'auth'
+import { sendMessage, addListener } from '../modules/messaging'
+import { API_BASE, STORAGE_KEY } from '../modules/constants'
 
-function openAuthTab () {
-  chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
+function onPopupTriggerAuth () {
+  chrome.storage.local.get([STORAGE_KEY], results => {
+    if (!results[STORAGE_KEY]) {
+      chrome.tabs.create({
+        url: `${API_BASE}/oauth/ext`,
+        active: true
+      })
+    }
+  })
 }
 
-function onToken (data, sendResponse) {
+function onPopupOpenApps () {
+  chrome.tabs.create({
+    url: `${API_BASE}/apps`,
+    active: true
+  })
+}
+
+async function onToken (data) {
   const { accessToken, subscription } = data
   let payload = {}
-  payload[storageKey] = {
+  payload[STORAGE_KEY] = {
     auth: {
       accessToken: accessToken,
       subscription: subscription
     }
   }
-  chrome.storage.local.set(payload, () => {
-    sendResponse({ authenticated: !chrome.runtime.lastError })
+  await chrome.storage.local.set(payload)
+  const isAuthenticated = !chrome.runtime.lastError
+  sendMessage('popup-set-view', {
+    isAuthenticated
   })
-
-  // keeps message port open until set storage triggers sendResponse()
-  return true
+  return {
+    isAuthenticated
+  }
 }
 
-chrome.storage.local.get(
-  [storageKey],
-  result => {
-    if (!result[storageKey]) {
-      openAuthTab()
-    }
-  }
-)
-
-function onSubscriptionChange (data) {
+async function onSubscription (data) {
   const { subscription } = data
   let payload = {}
-  payload[storageKey]['auth']['subscription'] = subscription
-  chrome.storage.local.set(payload, () => {
-    chrome.storage.local.get([storageKey], result => {
-      console.log(result)
+  payload[STORAGE_KEY]['auth']['subscription'] = subscription
+  await chrome.storage.local.set(payload)
+  chrome.storage.local.get([STORAGE_KEY], results => {
+    console.log(results)
+    return results
+  })
+}
+
+async function onPopupCheckAuth () {
+  await chrome.storage.local.get([STORAGE_KEY], results => {
+    sendMessage('popup-set-view', {
+      isAuthenticated: !!results[STORAGE_KEY]
     })
   })
-
-  return true
 }
 
-function onMessage (request, sender, sendResponse) {
-  if (!request) return
-
-  const { type, data } = request
-  if (type === 'token' && data) onToken(data, sendResponse)
-  if (type === 'subscription' && data) onSubscriptionChange(data)
-
-  return true
-}
-
-chrome.runtime.onMessage.addListener(onMessage)
+addListener('token', onToken)
+addListener('subscription', onSubscription)
+addListener('popup-check-auth', onPopupCheckAuth)
+addListener('popup-trigger-auth', onPopupTriggerAuth)
+addListener('popup-open-apps', onPopupOpenApps)
