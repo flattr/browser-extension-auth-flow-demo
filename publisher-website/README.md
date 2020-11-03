@@ -5,9 +5,14 @@
 
 ## Checking if the visitor is a paying Flattr user
 
-The visiting extension will expose an api endpoint if there is an active user, calling it will instantly return a [payload](#payload) to be validated.
-```js
-FlattrExt.isPayingUser(): payload
+The visiting extension will attach an event listener (`flattr-request-payload`) on the document. Trigger this event to request the payload. The extension will then respond with the event `flattr-payload` with an attached cryptographically signed and encoded string.
+
+Example response:
+
+```json
+{
+  "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWOQXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
+}
 ```
 
 ### <a name="payload">Payload structure</a>

@@ -81,12 +81,24 @@ document.addEventListener('flattr-token', event => {
   })
 })
 ```
-### Fetching the subscription status
+
+<!-- TODO: Combine and improve these two sections with more information about how to fetch the status and then how to send it as a response to the event, -->
+
+## Fetching the subscription status
 
 The payload delivered with the `flattr-token` event contains information
 about the authenticated users subscription status. A user with an active subscription will have `subscription: { active: true } }` in the payload as well as an `accessToken`.
 
 The extension should then continue to fetch the shareable subscription status payload from the [API](../api/README.md).
 
-## FlattrExt API
-The extension provides access to a [payload](../publisher-website/README.md#payload) that can be used to verify that the visitor is a paying Flattr user.
+## Sending the subscription status
+The extension should provide access to the cryptographically signed and encoded [payload](../publisher-website/README.md#payload) that can be used to verify that the visitor is a paying Flattr user.
+
+This data is sent by listening for the DOM event `flattr-request-payload` and responding with the event `flattr-payload`.
+
+Example payload:
+```json
+{
+  "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWOQXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
+}
+```

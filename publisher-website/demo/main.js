@@ -1,7 +1,6 @@
 'use strict'
 
 const examplePublicKey = '-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5Ey6dSJ0rKUJ0K/+kguEPSNHnH8FekBq5DC5U3pka6qoGkuRuzpVApp6bQ8Ks/ZTAH2yHoGe3SrP4HJo1JJ/KJH4+q3f0oW8zKXonpGAOHZ5SOasFHWj5rNdEwVsBT2mGMvKjVcx6m736KRSPfv4Ufx9eoFmll2AgG9Xmq3vUU/LWQSWgwZtJdBAE2k22JsI9S8eQYpAyg89d/81gM7W+WUR7xmAaTnigdV5Xj0NrPlUm/qh01NNY1gKbxiPdz54/vy5Govf8I9R/FBHewlqPHXFIaZsb2QZ+4LHk7LlEW+H47HU2krtamu+a182nwBSIJnlzDXi0nhul6H6pVzQcwIDAQAB-----END PUBLIC KEY-----'
-const examplePayload = 'eyJwYXlpbmciOnRydWUsInRzIjoxNjAzODczODMxfQ.p6V9Kt6nA8l7Bl656ZT4Y33OblczVkcufIQMAsDcLvBfsbvS5G26+OVA1J2Ltt7sKibiTkiY6WQL9m6/8awF+4aSL//fKc8Lh3kocJN4Hx0fBffH3PWtheCOPFpkFgndJF/Sk2lsscTMEp7mxXqVL3uTaHkbeUihL8c0miMRVbQ1zDyfyBQ611TNlvXaRQvy87OB1a9ytLSROv474crlTtDVVjVuW68keiIvJtGky5DVTGTn1F+Kac5ELBrWE1nUOmiLBVft5yAi40ZaOmSMiwyhFJRsb+VmPjncCjwBbEeHyw7Xx7q39/OPGSsVwNEAQ4K3XxDCTYFl380m+dDAcw'
 
 const algorithm = {
   name: 'RSASSA-PKCS1-v1_5',
@@ -54,11 +53,61 @@ const verifyPayload = async function (payload) {
 
   return {
     isValid,
-    data: parsedData
+    isPaying: false,
+    expiresAt: null,
+    ...parsedData
   }
 }
 
-;(async () => {
-  const results = await verifyPayload(examplePayload)
-  console.table(results)
-})()
+const messageEl = document.getElementById('message')
+
+let timer = null
+let tries = 0
+
+// TODO: Request a real payload from the extension and only verify if it is returned
+// TODO: We need a better way to wait for the extension to be ready
+const init = () => {
+  let message = 'No Flattr extension detected. ☹️'
+
+  if (tries > 10) {
+    messageEl.innerText = message
+    return
+  }
+  
+  // If we don't get a response we try again
+  timer = setTimeout(init, 1000)
+  tries++;
+
+  const trigger = new Event('flattr-request-payload')
+  document.dispatchEvent(trigger)
+
+  document.addEventListener('flattr-payload', async ({ detail: { payload } }) => {
+    clearTimeout(timer)
+
+    const {
+      isValid,
+      isPaying,
+      expiresAt
+    } = await verifyPayload(payload)
+
+    message = 'No Flattr user detected. 🤕'
+
+    // TODO: Check that expiresAt isn't before current time?
+    if (isValid && isPaying) {
+      message = 'Paying Flattr user detected! 🎉'
+    } else if (!isValid && isPaying) {
+      message = 'Payload was invalid. 🤐'
+    } else if (isValid && !isPaying) {
+      message = 'Non-paying Flattr user detected! 🤨'
+    }
+
+    messageEl.innerText = message
+    console.table({
+      isValid,
+      isPaying,
+      expiresAt
+    })
+  })
+}
+
+init()
