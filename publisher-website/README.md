@@ -74,7 +74,8 @@ const importedKey = await window.crypto.subtle.importKey(
   
 #### 2. Verify the data signature
 
-Before we can verify the payload signature we need to prepare the data and signature parts of the payload. Both parts are base64 encded strings and we need to [turn them both into array buffers](#to-array-buffer). We also need to base64 decode the signature before use.
+Before we can verify the payload signature we need to prepare the data and
+signature parts of the payload. Both parts are base64 encoded strings and we need to [turn them both into array buffers](#to-array-buffer). We also need to base64 decode the signature before use.
 
 Lastly, using the imported key from the last step we can now verify the payload signature using [crypto.subtle.verify](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/verify):
 
