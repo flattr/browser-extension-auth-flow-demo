@@ -8,19 +8,20 @@ function dispatchEvent (name, data = {}) {
   )
 }
 
-function onAuthenticated ({ isAuthenticated }) {
-  dispatchEvent('authenticated', { authenticated: isAuthenticated })
-}
-
 document.addEventListener('flattr-trigger', event => {
   if (event.detail.action !== 'authentication') return
-
   dispatchEvent('authenticate')
 })
 
-document.addEventListener('flattr-token', event => {
+document.addEventListener('flattr-token', async event => {
   const { accessToken, subscription } = event.detail
-  sendMessage('token', { accessToken, subscription }, onAuthenticated)
+  const { isAuthenticated } = await sendMessage('token', { accessToken, subscription })
+  dispatchEvent('authenticated', {
+    authenticated: isAuthenticated
+  })
+  sendMessage('popup-set-view', {
+    isAuthenticated
+  })
 })
 
 document.addEventListener('flattr-subscription', event => {

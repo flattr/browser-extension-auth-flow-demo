@@ -29,4 +29,8 @@ button.addEventListener('click', onButtonClick)
 link.addEventListener('click', onLinkClick)
 
 addListener('popup-set-view', setView)
-sendMessage('popup-check-auth')
+
+;(async () => {
+  const response = await sendMessage('popup-check-auth')
+  setView(response)
+})();
