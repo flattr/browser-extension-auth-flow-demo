@@ -7,8 +7,9 @@
     "rollup-plugin-chrome-extension": "^3.4.0"
   },
   "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -c -w",
-    "build:prod": "rollup -c --environment TARGET_ENV:production"
+    "build:dev": "rollup -c",
+    "watch:dev": "rollup -c -w",
+    "build:prod": "rollup -c --environment TARGET_ENV:production",
+    "watch:prod": "rollup -c -w --environment TARGET_ENV:production"
   }
 }
