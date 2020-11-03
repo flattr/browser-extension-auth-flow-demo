@@ -3,7 +3,6 @@
   "private": true,
   "devDependencies": {
     "@rollup/plugin-replace": "^2.3.4",
-    "parcel": "^1.12.4",
     "rollup": "^2.33.1",
     "rollup-plugin-chrome-extension": "^3.4.0"
   },
