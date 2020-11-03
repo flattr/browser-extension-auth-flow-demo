@@ -30,10 +30,12 @@ two properties; `isPaying` and `expiresAt`.
 
 Example JSON data could be:
 
-	{
-	  "isPaying": true,
-	  "expiresAt": 1603885771
-	}
+```JSON
+{
+  "isPaying": true,
+  "expiresAt": 1603885771
+}
+```
 
 `expiresAt` specifies when the payload expires as a unix timestamp.
 
@@ -60,14 +62,15 @@ The public key is originally in the [PEM format](https://en.wikipedia.org/wiki/P
 
 This gives us a key that can be used by `importKey`.
 
-	const importedKey = await window.crypto.subtle.importKey(
-	  'spki',
-	  publicKey,
-	  algorithm,
-	  false,
-	  ['verify']
-	)
-
+```javascript
+const importedKey = await window.crypto.subtle.importKey(
+  'spki',
+  publicKey,
+  algorithm,
+  false,
+  ['verify']
+)
+```
   
 #### 2. Verify the data signature
 
@@ -75,28 +78,32 @@ Before we can verify the payload signature we need to prepare the data and signa
 
 Lastly, using the imported key from the last step we can now verify the payload signature using [crypto.subtle.verify](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/verify):
 
-    const isValid = await window.crypto.subtle.verify(
-      algorithm,
-      importedKey,
-      toArrayBuffer(window.atob(signature)),
-      toArrayBuffer(data)
-    )
+```javascript
+const isValid = await window.crypto.subtle.verify(
+  algorithm,
+  importedKey,
+  toArrayBuffer(window.atob(signature)),
+  toArrayBuffer(data)
+)
+```
 
 
 #### <a name="to-array-buffer">Converting a string into an `ArrayBuffer`</a>
 
 Below is example code for converting a string into an [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer).
 
-	const toArrayBuffer = function (str) {
-	  const buffer = new ArrayBuffer(str.length)
-	  let bytes = new Uint8Array(buffer)
+```javascript
+const toArrayBuffer = function (str) {
+  const buffer = new ArrayBuffer(str.length)
+  let bytes = new Uint8Array(buffer)
 
-	  for (let i = 0; i < str.length; i++) {
-	    bytes[i] = str.charCodeAt(i)
-	  }
+  for (let i = 0; i < str.length; i++) {
+    bytes[i] = str.charCodeAt(i)
+  }
 
-	  return bytes
-	}
+  return bytes
+}
+```
 
 ## Demo
 
