@@ -27,7 +27,7 @@ Example:
       -H "Accept: application/json" \
       https://api.flattr.com/rest/v2/subscription-status
 
-Fetching this endpoint will return an object with the authenticated user's subscription status. The returned JSON has 3 parts, `isPaying`, `expiresAt` and `payload.
+Fetching this endpoint will return an object with the authenticated user's subscription status. The returned JSON has 3 parts, `isPaying`, `expiresAt` and `payload`.
 
 * `isPaying`: a boolean value that is true when the user has an active subscription.
 * `expiresAt`: The time, as a [unix timestamp](https://en.wikipedia.org/wiki/Unix_time), at which this payload will have to be renewed. The extension should make sure to update this payload shortly after the expire time.
