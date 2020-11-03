@@ -2,6 +2,7 @@
 
 import * as api from './modules/api.js'
 import * as keys from './modules/keys.js'
+import * as storage from './modules/storage.js'
 
 function openAuthTab () {
   chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
