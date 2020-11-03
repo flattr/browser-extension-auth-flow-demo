@@ -34,6 +34,9 @@ document.addEventListener('flattr-subscription', event => {
   sendMessage('subscription', { type: 'subscription', subscription })
 })
 
-const FlattrExt = {
-  isPayingUser: () => sendMessage('payload-request', {}, payload => payload)
-}
+document.addEventListener('flattr-request-payload', event => {
+  // TODO: Do stuff to get real payload...
+  dispatchEvent('payload', {
+    payload: 'eyJwYXlpbmciOnRydWUsInRzIjoxNjAzODczODMxfQ.p6V9Kt6nA8l7Bl656ZT4Y33OblczVkcufIQMAsDcLvBfsbvS5G26+OVA1J2Ltt7sKibiTkiY6WQL9m6/8awF+4aSL//fKc8Lh3kocJN4Hx0fBffH3PWtheCOPFpkFgndJF/Sk2lsscTMEp7mxXqVL3uTaHkbeUihL8c0miMRVbQ1zDyfyBQ611TNlvXaRQvy87OB1a9ytLSROv474crlTtDVVjVuW68keiIvJtGky5DVTGTn1F+Kac5ELBrWE1nUOmiLBVft5yAi40ZaOmSMiwyhFJRsb+VmPjncCjwBbEeHyw7Xx7q39/OPGSsVwNEAQ4K3XxDCTYFl380m+dDAcw'
+  })
+})
