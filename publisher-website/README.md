@@ -50,18 +50,19 @@ Before we can use it we need to verify the signature of the data. In our example
 
 #### 1. Create a `CryptoKey` from the public key
 
-Import the public key into the `SubtleCrypto` interface using the [`crypto.subtle.importKey`](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey) method. This will return a `CryptoKey` that we can use to verify the payload later on.
+In order to verify the payload we first need to import it into the `SubtleCrypto` interface using the [`crypto.subtle.importKey`](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey) method. This will return a `CryptoKey` that we can use later on.
 
-The public key is originally in the [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail). We need it to be an ArrayBuffer
+The public key is originally in the [PEM format](https://en.wikipedia.org/wiki/Privacy-Enhanced_Mail) but we need it to be an ArrayBuffer. To get there we need to do the following:
 
-1. so we strip its header and footer to get a raw base64 encoded string.
-1. Then base64 decode and [convert the raw key into an `ArrayBuffer`](#to-array-buffer).
+1. Strip the header and footer ("-----BEGIN PUBLIC KEY-----" and "-----END PUBLIC KEY-----") in order to get the raw base64 encoded string.
+1. Base64 decode said string.
+1. [Convert the now decoded string into an `ArrayBuffer`](#to-array-buffer).
 
-We now have a key that can be used by `importKey`.
+This gives us a key that can be used by `importKey`.
 
 	const importedKey = await window.crypto.subtle.importKey(
 	  'spki',
-	  flattrPublicKey,
+	  publicKey,
 	  algorithm,
 	  false,
 	  ['verify']
@@ -70,10 +71,9 @@ We now have a key that can be used by `importKey`.
   
 #### 2. Verify the data signature
 
-Using the imported key we can now verify the payload signature using [crypto.subtle.verify](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/verify), but first we need to prepare the data and signature for use with `crypto.subtle.verify`.
+Before we can verify the payload signature we need to prepare the data and signature parts of the payload. Both parts are base64 encded strings and we need to [turn them both into array buffers](#to-array-buffer). We also need to base64 decode the signature before use.
 
-The data and signature parts of the payload are both base64 encoded strings and in order to use them we need to turn them both into [`ArrayBuffers`](#to-array-buffer). The signature will also have to be base64 decoded before use.
-
+Lastly, using the imported key from the last step we can now verify the payload signature using [crypto.subtle.verify](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/verify):
 
     const isValid = await window.crypto.subtle.verify(
       algorithm,
