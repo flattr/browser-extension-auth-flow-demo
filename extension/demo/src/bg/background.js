@@ -19,7 +19,7 @@ function onToken (data, sendResponse) {
 }
 
 function timeToLive (expiresAt) {
-  return expiresAt - (Date.now() + 3600)
+  return expiresAt - (Math.floor(Date.now() / 1000) + 3600)
 }
 
 function updatePayload () {
