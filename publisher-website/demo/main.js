@@ -16,16 +16,15 @@ const pemToArrayBuffer = function (pem) {
   // cleanKey should be a raw base64 string
   const cleanKey = pem.replace(/\n|-----BEGIN PUBLIC KEY-----|-----END PUBLIC KEY-----/g, '')
 
-  return keyToArrayBuffer(cleanKey);
+  return toArrayBuffer(window.atob(cleanKey));
 }
 
-const keyToArrayBuffer = function (rawKey) {
-  const decoded = window.atob(rawKey)
-  const buffer = new ArrayBuffer(decoded.length)
+const toArrayBuffer = function (data) {
+  const buffer = new ArrayBuffer(data.length)
   let bytes = new Uint8Array(buffer)
 
-  for (let i = 0; i < decoded.length; i++) {
-    bytes[i] = decoded.charCodeAt(i)
+  for (let i = 0; i < data.length; i++) {
+    bytes[i] = data.charCodeAt(i)
   }
 
   return bytes
@@ -45,8 +44,8 @@ const verifyPayload = async function (payload) {
   const isValid = await window.crypto.subtle.verify(
     algorithm,
     importedKey,
-    keyToArrayBuffer(signature),
-    keyToArrayBuffer(data)
+    toArrayBuffer(window.atob(signature)),
+    toArrayBuffer(data)
   )
 
   const parsedData = JSON.parse(window.atob(data))
