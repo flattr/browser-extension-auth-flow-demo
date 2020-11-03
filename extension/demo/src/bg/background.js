@@ -3,13 +3,14 @@
 import { sendMessage, addListener } from '../modules/messaging'
 import { API_BASE, STORAGE_KEY } from '../modules/constants'
 
-/**
- * @todo Check if already authenticated first?
- */
 function onPopupTriggerAuth () {
-  chrome.tabs.create({
-    url: `${API_BASE}/oauth/ext`,
-    active: true
+  chrome.storage.local.get([STORAGE_KEY], results => {
+    if (!results[STORAGE_KEY]) {
+      chrome.tabs.create({
+        url: `${API_BASE}/oauth/ext`,
+        active: true
+      })
+    }
   })
 }
 
