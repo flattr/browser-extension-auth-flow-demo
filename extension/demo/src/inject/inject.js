@@ -8,8 +8,8 @@ function dispatchEvent (name, data = {}) {
   )
 }
 
-function onAuthenticated ({ authenticated }) {
-  dispatchEvent('authenticated', { authenticated })
+function onAuthenticated ({ isAuthenticated }) {
+  dispatchEvent('authenticated', { authenticated: isAuthenticated })
 }
 
 document.addEventListener('flattr-trigger', event => {
