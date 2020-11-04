@@ -18,13 +18,24 @@ function onLinkClick (event) {
   sendMessage('popup-open-apps')
 }
 
-// TODO: Actually do something
-// TODO: Disabled while saving?
-function toggleSendStatus () {
-  const isChecked = toggle.getAttribute('aria-checked')
-  const newValue = isChecked === 'false'
-  // TODO: Should we be removing the attribute instead of setting it to true?
+function setToggle ({ isChecked }) {
+  toggle.setAttribute('aria-checked', isChecked)
+  toggle.removeAttribute('disabled')
+}
+
+async function toggleEmitStatus () {
+  const oldValue = toggle.getAttribute('aria-checked') === 'true'
+  const newValue = !oldValue
   toggle.setAttribute('aria-checked', newValue)
+  toggle.setAttribute('disabled', true)
+  try {
+    await sendMessage('set-emit-status', newValue)
+  } catch (error) {
+    toggle.setAttribute('aria-checked', oldValue)
+    throw error
+  } finally {
+    toggle.removeAttribute('disabled')
+  }
 }
 
 function setView ({ isAuthenticated = false }) {
@@ -39,11 +50,12 @@ function setView ({ isAuthenticated = false }) {
 
 button.addEventListener('click', onButtonClick)
 link.addEventListener('click', onLinkClick)
-toggle.addEventListener('click', toggleSendStatus)
+toggle.addEventListener('click', toggleEmitStatus)
 
 addListener('popup-set-view', setView)
 
 ;(async () => {
-  const response = await sendMessage('popup-check-auth')
-  setView(response)
+  const { isAuthenticated, emitStatus } = await sendMessage('popup-setup')
+  setToggle({ isChecked })
+  setView({ isAuthenticated })
 })();

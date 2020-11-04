@@ -3,24 +3,21 @@
 import browser from 'webextension-polyfill'
 
 import { addListener } from '../modules/messaging'
-import { API_BASE, STORAGE_KEY } from '../modules/constants'
+import {
+  API_BASE,
+  STORAGE_KEY_ACCESS_TOKEN,
+  STORAGE_KEY_SUBSCRIPTION,
+  STORAGE_KEY_EMIT_STATUS
+} from '../modules/constants'
 
 async function getIsAuthenticated () {
-  const results = await browser.storage.local.get([STORAGE_KEY])
-  return !!results[STORAGE_KEY]
+  const results = await browser.storage.local.get([STORAGE_KEY_ACCESS_TOKEN])
+  return !!results[STORAGE_KEY_ACCESS_TOKEN]
 }
 
-/**
- * @param {object} data Data to save to storage
- * @returns {Promise}
- */
-function updateStorage (data) {
-  const payload = {
-    [STORAGE_KEY]: {
-      auth: data
-    }
-  }
-  return browser.storage.local.set(payload)
+async function getEmitStatus () {
+  const results = await browser.storage.local.get([STORAGE_KEY_EMIT_STATUS])
+  return !!results[STORAGE_KEY_EMIT_STATUS]
 }
 
 async function onPopupTriggerAuth () {
@@ -40,27 +37,56 @@ function onPopupOpenApps () {
   })
 }
 
-async function onToken (data) {
-  await updateStorage(data)
-  const isAuthenticated = !browser.runtime.lastError
-  return {
-    isAuthenticated
-  }
+function onSetEmitStatus (data) {
+  return browser.storage.local.set({
+    [STORAGE_KEY_EMIT_STATUS]: data
+  })
 }
 
-function onSubscription (data) {
-  updateStorage(data)
+function onGetEmitStatus () {
+  return getEmitStatus()
 }
 
-async function onPopupCheckAuth () {
+async function onSetTokenAndSubscription ({ accessToken, subscription }) {
+  await browser.storage.local.set({
+    [STORAGE_KEY_ACCESS_TOKEN]: accessToken,
+    [STORAGE_KEY_SUBSCRIPTION]: subscription
+  })
   const isAuthenticated = await getIsAuthenticated()
   return {
     isAuthenticated
   }
 }
 
-addListener('token', onToken)
-addListener('subscription', onSubscription)
-addListener('popup-check-auth', onPopupCheckAuth)
+function onSetSubscription (subscription) {
+  return browser.storage.local.set({
+    [STORAGE_KEY_SUBSCRIPTION]: subscription
+  })
+}
+
+async function onPopupSetup () {
+  const results = await browser.storage.local.get([STORAGE_KEY_EMIT_STATUS])
+  const hasEmitStatus = results.hasOwnProperty(STORAGE_KEY_EMIT_STATUS)
+
+  if (!hasEmitStatus) {
+    await browser.storage.local.set({
+      [STORAGE_KEY_EMIT_STATUS]: true
+    })
+  }
+
+  const isAuthenticated = await getIsAuthenticated()
+  const emitStatus = await getEmitStatus()
+
+  return {
+    isAuthenticated,
+    emitStatus
+  }
+}
+
+addListener('set-token-and-subscription', onSetTokenAndSubscription)
+addListener('set-subscription', onSetSubscription)
+addListener('popup-setup', onPopupSetup)
 addListener('popup-trigger-auth', onPopupTriggerAuth)
 addListener('popup-open-apps', onPopupOpenApps)
+addListener('set-emit-status', onSetEmitStatus)
+addListener('get-emit-status', onGetEmitStatus)

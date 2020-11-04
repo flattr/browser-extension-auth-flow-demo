@@ -15,7 +15,7 @@ document.addEventListener('flattr-trigger', event => {
 
 document.addEventListener('flattr-token', async event => {
   const { accessToken, subscription } = event.detail
-  const { isAuthenticated } = await sendMessage('token', { accessToken, subscription })
+  const { isAuthenticated } = await sendMessage('set-token-and-subscription', { accessToken, subscription })
   dispatchEvent('authenticated', {
     authenticated: isAuthenticated
   })
@@ -29,7 +29,9 @@ document.addEventListener('flattr-subscription', event => {
   sendMessage('subscription', { type: 'subscription', subscription })
 })
 
-document.addEventListener('flattr-request-payload', event => {
+document.addEventListener('flattr-request-payload', async event => {
+  const emitStatus = await sendMessage('get-emit-status')
+  if (!emitStatus) return // TODO: Should we send something else instead?
   // TODO: Do stuff to get real payload...
   dispatchEvent('payload', {
     payload: 'eyJwYXlpbmciOnRydWUsInRzIjoxNjAzODczODMxfQ.p6V9Kt6nA8l7Bl656ZT4Y33OblczVkcufIQMAsDcLvBfsbvS5G26+OVA1J2Ltt7sKibiTkiY6WQL9m6/8awF+4aSL//fKc8Lh3kocJN4Hx0fBffH3PWtheCOPFpkFgndJF/Sk2lsscTMEp7mxXqVL3uTaHkbeUihL8c0miMRVbQ1zDyfyBQ611TNlvXaRQvy87OB1a9ytLSROv474crlTtDVVjVuW68keiIvJtGky5DVTGTn1F+Kac5ELBrWE1nUOmiLBVft5yAi40ZaOmSMiwyhFJRsb+VmPjncCjwBbEeHyw7Xx7q39/OPGSsVwNEAQ4K3XxDCTYFl380m+dDAcw'
