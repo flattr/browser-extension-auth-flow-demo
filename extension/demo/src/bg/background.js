@@ -1,7 +1,7 @@
 'use strict'
 
 import { sendMessage, addListener } from '../modules/messaging'
-import { API_BASE, ACCESS_TOKEN, SUBSCRIPTION, PAYLOAD, TTL } from '../modules/constants'
+import { ACCESS_TOKEN, PAYLOAD, TTL, API_BASE_WEB } from '../modules/constants'
 import * as api from '../modules/api'
 import * as storage from '../modules/storage'
 
@@ -9,7 +9,7 @@ async function onPopupTriggerAuth () {
   const accessToken = await storage.get(ACCESS_TOKEN)
   if (!accessToken) {
     chrome.tabs.create({
-      url: `${API_BASE}/oauth/ext`,
+      url: `${API_BASE_WEB}/oauth/ext`,
       active: true
     })
   }
@@ -17,7 +17,7 @@ async function onPopupTriggerAuth () {
 
 function onPopupOpenApps () {
   chrome.tabs.create({
-    url: `${API_BASE}/apps`,
+    url: `${API_BASE_WEB}/apps`,
     active: true
   })
 }
@@ -25,9 +25,11 @@ function onPopupOpenApps () {
 async function onToken (data) {
   const { accessToken, subscription } = data
   const isAuthenticated = await storage.set({ accessToken, subscription })
+  storage.get(ACCESS_TOKEN).then(console.log)
   sendMessage('popup-set-view', {
     isAuthenticated
   })
+  storage.get(ACCESS_TOKEN).then(console.log)
 
   return {
     isAuthenticated
@@ -38,18 +40,20 @@ function timeToLive (expiresAt) {
   return expiresAt - (Math.floor(Date.now() / 1000) + 3600)
 }
 
-async function updatePayload () {
+async function updatePayload (accessToken) {
   const payload = await storage.get(PAYLOAD)
   if (!payload) {
-    const response = await api.fetchPayload()
-    if (response.hasOwnProperty(PAYLOAD)) { // fetch return might need to go through .json()?
-      let { expiresAt, payload } = response
-      await storage.set({ expiresAt, payload })
+    const subscriptionStatus = await api.fetchSubscriptionStatus(accessToken)
+    console.log(subscriptionStatus)
+    if (subscriptionStatus.hasOwnProperty(PAYLOAD)) {
+      storage.set(subscriptionStatus)
     }
   } else {
     const ttl = await storage.get(TTL)
     if (ttl) {
-      setTimeout(updatePayload, timeToLive(ttl))
+      let timeout = timeToLive(ttl)
+      console.log(timeout)
+      setTimeout(updatePayload.bind(null, accessToken), timeout)
     }
   }
 }
@@ -75,7 +79,8 @@ async function init () {
 
   const accessToken = await storage.get(ACCESS_TOKEN)
   if (accessToken) {
-    updatePayload()
+    console.log(accessToken)
+    updatePayload(accessToken)
   }
 }
 

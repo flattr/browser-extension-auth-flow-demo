@@ -1,6 +1,7 @@
 'use strict'
+import { API_BASE } from './constants'
 
-export function fetchPayload (accessToken) {
+export function fetchSubscriptionStatus (accessToken) {
   return fetch(
     `${API_BASE}/rest/v2/subscription-status`,
     {
@@ -10,5 +11,5 @@ export function fetchPayload (accessToken) {
         'Content-Type': 'application/json'
       }
     }
-  )
+  ).then(response => response.json())
 }
