@@ -75,8 +75,8 @@ async function init () {
 
   const accessToken = await storage.get(ACCESS_TOKEN)
   if (accessToken) {
-    await updatePayload()
+    updatePayload()
   }
 }
 
-await init()
+init()
