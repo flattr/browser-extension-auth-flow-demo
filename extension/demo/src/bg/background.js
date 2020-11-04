@@ -77,5 +77,4 @@ async function onPopupCheckAuth () {
   if (accessToken) {
     updatePayload()
   }
-  // ...
 })()
