@@ -29,7 +29,7 @@ async function onToken (data) {
   sendMessage('popup-set-view', {
     isAuthenticated
   })
-  storage.get(ACCESS_TOKEN).then(console.log)
+  updatePayload(accessToken)
 
   return {
     isAuthenticated
