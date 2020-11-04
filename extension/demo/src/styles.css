@@ -1,0 +1,33 @@
+*, :after, :before {
+  box-sizing: inherit;
+}
+
+html {
+  box-sizing: border-box;
+  font-family: system-ui,BlinkMacSystemFont,-apple-system,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Fira Sans,Droid Sans,Helvetica Neue,sans-serif;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  margin: 0;
+  width: 15rem;
+}
+
+.button {
+  width: auto;
+  background-color: #6bc76b;
+  appearance: none;
+  border: 0;
+  border-radius: 9999px;
+  padding: .5rem 1rem;
+}
+
+.link {
+  color: #2779bd;
+  text-decoration: underline;
+}

@@ -8,15 +8,17 @@ Demonstration extension for auth flow setup
 ![Auth flow chart](assets/auth-flow.png?raw=true "Auth flow chart")
 
 ### Step-by-step
+> These examples are abbreviated for readability. A fully working example can be found in the [extension demo](./demo).
+
 #### 1. Initiate authentication process
 The extension initiates the authentication process (if the extension is not already authenticated) by opening flattr.com/oauth/ext in a new browser tab. Ideally triggered by a button in the extension popup.
 
 ```javascript
 // Background script
 chrome.storage.local.get(
-  [storageKey],
+  'accessToken',
   result => {
-    if (!result[storageKey]) {
+    if (!result) {
       chrome.tabs.create({ url: 'https://flattr.com/oauth/ext', active: true })
     }
   }
@@ -64,37 +66,39 @@ Lastly, the extension responds with the event `flattr-authenticated`. The event 
 // Content script
 document.addEventListener('flattr-token', event => {
   const { accessToken, subscription } = event.detail
-  saveToken({ accessToken, subscription }, data => {
+  
+  chrome.storage.local.set({
+    accessToken,
+    subscription
+  }, () => {
     document.dispatchEvent(
-      new CustomEvent('flattr-token', { detail: data })
+      new CustomEvent('flattr-authenticated', {
+        detail: {
+          authenticated: !chrome.runtime.lastError
+        }
+      })
     )
   })
 })
-
-// Background script
-function saveToken (data, sendResponse) {
-  const { accessToken, subscription } = data
-  let payload = {}
-  payload[storageKey] = {
-    auth: {
-      accessToken: accessToken,
-      subscription: subscription
-    }
-  }
-  chrome.storage.local.set(payload, () => {
-    sendResponse({ authenticated: !chrome.runtime.lastError })
-  })
-
-  // keeps message port open until set storage triggers sendResponse()
-  return true
-}
 ```
-### Fetching the subscription status
+
+<!-- TODO: Combine and improve these two sections with more information about how to fetch the status and then how to send it as a response to the event, -->
+
+## Fetching the subscription status
 
 The payload delivered with the `flattr-token` event contains information
 about the authenticated users subscription status. A user with an active subscription will have `subscription: { active: true } }` in the payload as well as an `accessToken`.
 
 The extension should then continue to fetch the shareable subscription status payload from the [API](../api/README.md).
 
-## FlattrExt API
-The extension provides access to a [payload](../publisher-website/README.md#payload) that can be used to verify that the visitor is a paying Flattr user.
+## Sending the subscription status
+The extension should provide access to the cryptographically signed and encoded [payload](../publisher-website/README.md#payload) that can be used to verify that the visitor is a paying Flattr user.
+
+This data is sent by listening for the DOM event `flattr-request-payload` and responding with the event `flattr-payload`.
+
+Example payload:
+```json
+{
+  "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWOQXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
+}
+```
