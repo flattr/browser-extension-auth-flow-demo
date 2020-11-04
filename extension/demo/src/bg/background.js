@@ -41,7 +41,7 @@ function timeToLive (expiresAt) {
 async function updatePayload () {
   const payload = await storage.get(PAYLOAD)
   if (!payload) {
-    const response = await api.fetchPayload()
+    const response = await api.fetchSubscriptionStatus()
     if (response.hasOwnProperty(PAYLOAD)) { // fetch return might need to go through .json()?
       let { expiresAt, payload } = response
       await storage.set({ expiresAt, payload })
@@ -66,17 +66,16 @@ async function onPopupCheckAuth () {
   })
 }
 
-async function init () {
+;(async => {
   addListener('token', onToken)
   addListener('subscription', onSubscription)
   addListener('popup-check-auth', onPopupCheckAuth)
   addListener('popup-trigger-auth', onPopupTriggerAuth)
   addListener('popup-open-apps', onPopupOpenApps)
 
-  const accessToken = await storage.get(ACCESS_TOKEN)
+  const accessToken = storage.get(ACCESS_TOKEN)
   if (accessToken) {
-    await updatePayload()
+    updatePayload()
   }
-}
-
-await init()
+  // ...
+})()

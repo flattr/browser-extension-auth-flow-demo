@@ -1,5 +1,7 @@
 'use strict'
 
+import { API_BASE } from '../modules/constants'
+
 export function fetchPayload (accessToken) {
   return fetch(
     `${API_BASE}/rest/v2/subscription-status`,
