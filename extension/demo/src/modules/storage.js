@@ -1,3 +1,5 @@
+'use strict'
+
 export async function set (data) {
   await chrome.storage.local.set(data)
 
@@ -6,7 +8,7 @@ export async function set (data) {
 
 export async function get (key) {
   chrome.storage.local.get([key], results => {
-    return results
+    return results[key]
   })
 }
 

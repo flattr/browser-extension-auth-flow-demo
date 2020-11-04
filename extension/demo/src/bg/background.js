@@ -1,20 +1,18 @@
 'use strict'
 
 import { sendMessage, addListener } from '../modules/messaging'
-import { API_BASE, STORAGE_KEY } from '../modules/constants'
-import * as api from './modules/api.js'
-import * as keys from './modules/keys.js'
-import * as storage from './modules/storage.js'
+import { API_BASE, ACCESS_TOKEN, SUBSCRIPTION, PAYLOAD, TTL } from '../modules/constants'
+import * as api from '../modules/api'
+import * as storage from '../modules/storage'
 
-function onPopupTriggerAuth () {
-  chrome.storage.local.get([STORAGE_KEY], results => {
-    if (!results[STORAGE_KEY]) {
-      chrome.tabs.create({
-        url: `${API_BASE}/oauth/ext`,
-        active: true
-      })
-    }
-  })
+async function onPopupTriggerAuth () {
+  const accessToken = await storage.get(ACCESS_TOKEN)
+  if (!accessToken) {
+    chrome.tabs.create({
+      url: `${API_BASE}/oauth/ext`,
+      active: true
+    })
+  }
 }
 
 function onPopupOpenApps () {
@@ -26,8 +24,7 @@ function onPopupOpenApps () {
 
 async function onToken (data) {
   const { accessToken, subscription } = data
-  await chrome.storage.local.set({ accessToken, subscription })
-  const isAuthenticated = !chrome.runtime.lastError
+  const isAuthenticated = await storage.set({ accessToken, subscription })
   sendMessage('popup-set-view', {
     isAuthenticated
   })
@@ -37,70 +34,49 @@ async function onToken (data) {
   }
 }
 
-chrome.storage.local.get(
-  [storageKey],
-  result => {
-    if (!result[storageKey]) {
-      openAuthTab()
-    }
-  }
-)
-
 function timeToLive (expiresAt) {
   return expiresAt - (Math.floor(Date.now() / 1000) + 3600)
 }
 
-function updatePayload () {
-  return // this code does not work yet
-
-  chrome.storage.local.get(keys.payload, result => {
-    if (!result[keys.payload]) {
-      api.fetchPayload().then(payload => {
-        if (payload) { // fetch return might need to go through .json()?
-          // todo: create storage module
-          // storage.add(keys.payload, payload)
-          let data = {}
-          data[keys.payload] = payload
-          chrome.storage.local.set(data)
-        }
-      })
-    }  else {
-      setTimeout(updatePayload, timeToLive(result[keys.payload].expiresAt))
+async function updatePayload () {
+  const payload = await storage.get(PAYLOAD)
+  if (!payload) {
+    const response = await api.fetchPayload()
+    if (response.hasOwnProperty(PAYLOAD)) { // fetch return might need to go through .json()?
+      let { expiresAt, payload } = response
+      await storage.set({ expiresAt, payload })
     }
-  })
-}
-
-function init () {
-  chrome.storage.local.get(
-    [keys.accessToken],
-    result => {
-      console.log(result)
-      if (!result[keys.accessToken]) {
-        openAuthTab()
-      } else {
-        updatePayload()
-      }
+  } else {
+    const ttl = await storage.get(TTL)
+    if (ttl) {
+      setTimeout(updatePayload, timeToLive(ttl))
     }
-  )
+  }
 }
 
 async function onSubscription (data) {
   const { subscription } = data
-  chrome.storage.local.set(subscription)
+  await storage.set({ subscription })
 }
 
 async function onPopupCheckAuth () {
-  await chrome.storage.local.get([STORAGE_KEY], results => {
-    sendMessage('popup-set-view', {
-      isAuthenticated: !!results[STORAGE_KEY]
-    })
+  const accessToken = await storage.get(ACCESS_TOKEN)
+  sendMessage('popup-set-view', {
+    isAuthenticated: !!accessToken
   })
 }
 
-addListener('token', onToken)
-addListener('subscription', onSubscription)
-addListener('popup-check-auth', onPopupCheckAuth)
-addListener('popup-trigger-auth', onPopupTriggerAuth)
-addListener('popup-open-apps', onPopupOpenApps)
+async function init () {
+  addListener('token', onToken)
+  addListener('subscription', onSubscription)
+  addListener('popup-check-auth', onPopupCheckAuth)
+  addListener('popup-trigger-auth', onPopupTriggerAuth)
+  addListener('popup-open-apps', onPopupOpenApps)
 
-init()
+  const accessToken = await storage.get(ACCESS_TOKEN)
+  if (accessToken) {
+    await updatePayload()
+  }
+}
+
+await init()
