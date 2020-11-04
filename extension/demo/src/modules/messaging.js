@@ -1,22 +1,29 @@
 'use strict'
 
-export function addListener (key, callback = () => {}) {
-  chrome.runtime.onMessage.addListener(async (request, _, sendResponse) => {
-    if (!request) return
-    const { key: requestKey, data = {} } = request
+import browser from 'webextension-polyfill'
 
+/**
+ * @param {string} key Id/key for the message to listen for
+ * @param {function|Promise} callback Response handler 
+ */
+export function addListener (key, callback) {
+  const listener = ({ key: requestKey, data = {} }) => {
     if (requestKey === key) {
-      const response = await callback(data)
-      sendResponse(response)
-      return true
+      return Promise.resolve(callback(data))
     }
-  })
+  }
+  browser.runtime.onMessage.addListener(listener)
 }
 
-export function sendMessage (key, data, callback = () => {}) {
+/**
+ * @param {string} key Id/key for the message to send
+ * @param {object} data Data to send with the message
+ * @returns {Promise} Promise that is resolved with response of the listener
+ */
+export function sendMessage (key, data) {
   const payload = {
     key,
     data
   }
-  chrome.runtime.sendMessage(payload, callback)
+  return browser.runtime.sendMessage(payload)
 }

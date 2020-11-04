@@ -42,4 +42,8 @@ link.addEventListener('click', onLinkClick)
 toggle.addEventListener('click', toggleSendStatus)
 
 addListener('popup-set-view', setView)
-sendMessage('popup-check-auth')
+
+;(async () => {
+  const response = await sendMessage('popup-check-auth')
+  setView(response)
+})();

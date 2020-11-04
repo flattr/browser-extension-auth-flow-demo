@@ -1,62 +1,62 @@
 'use strict'
 
-import { sendMessage, addListener } from '../modules/messaging'
+import browser from 'webextension-polyfill'
+
+import { addListener } from '../modules/messaging'
 import { API_BASE, STORAGE_KEY } from '../modules/constants'
 
-function onPopupTriggerAuth () {
-  chrome.storage.local.get([STORAGE_KEY], results => {
-    if (!results[STORAGE_KEY]) {
-      chrome.tabs.create({
-        url: `${API_BASE}/oauth/ext`,
-        active: true
-      })
+async function getIsAuthenticated () {
+  const results = await browser.storage.local.get([STORAGE_KEY])
+  return !!results[STORAGE_KEY]
+}
+
+/**
+ * @param {object} data Data to save to storage
+ * @returns {Promise}
+ */
+function updateStorage (data) {
+  const payload = {
+    [STORAGE_KEY]: {
+      auth: data
     }
-  })
+  }
+  return browser.storage.local.set(payload)
+}
+
+async function onPopupTriggerAuth () {
+  const isAuthenticated = await getIsAuthenticated()
+  if (!isAuthenticated) {
+    browser.tabs.create({
+      url: `${API_BASE}/oauth/ext`,
+      active: true
+    })
+  }
 }
 
 function onPopupOpenApps () {
-  chrome.tabs.create({
+  browser.tabs.create({
     url: `${API_BASE}/apps`,
     active: true
   })
 }
 
 async function onToken (data) {
-  const { accessToken, subscription } = data
-  let payload = {}
-  payload[STORAGE_KEY] = {
-    auth: {
-      accessToken: accessToken,
-      subscription: subscription
-    }
-  }
-  await chrome.storage.local.set(payload)
-  const isAuthenticated = !chrome.runtime.lastError
-  sendMessage('popup-set-view', {
-    isAuthenticated
-  })
+  await updateStorage(data)
+  const isAuthenticated = !browser.runtime.lastError
   return {
     isAuthenticated
   }
 }
 
-async function onSubscription (data) {
-  const { subscription } = data
-  let payload = {}
-  payload[STORAGE_KEY]['auth']['subscription'] = subscription
-  await chrome.storage.local.set(payload)
-  chrome.storage.local.get([STORAGE_KEY], results => {
-    console.log(results)
-    return results
-  })
+function onSubscription (data) {
+  updateStorage(data)
 }
 
 async function onPopupCheckAuth () {
-  await chrome.storage.local.get([STORAGE_KEY], results => {
-    sendMessage('popup-set-view', {
-      isAuthenticated: !!results[STORAGE_KEY]
-    })
-  })
+  const isAuthenticated = await getIsAuthenticated()
+  return {
+    isAuthenticated
+  }
 }
 
 addListener('token', onToken)
