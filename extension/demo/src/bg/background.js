@@ -70,7 +70,7 @@ async function onPopupCheckAuth () {
   })
 }
 
-;(async => {
+;(async () => {
   addListener('token', onToken)
   addListener('subscription', onSubscription)
   addListener('popup-check-auth', onPopupCheckAuth)
