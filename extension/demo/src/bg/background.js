@@ -77,11 +77,9 @@ async function onPopupCheckAuth () {
   addListener('popup-trigger-auth', onPopupTriggerAuth)
   addListener('popup-open-apps', onPopupOpenApps)
 
-  storage.get(ACCESS_TOKEN)
-    .then(accessToken => {
-      if (accessToken) {
-        console.log(accessToken)
-        updatePayload(accessToken)
-      }
-    })
+  const accessToken = await storage.get(ACCESS_TOKEN)
+  if (accessToken) {
+    console.log(accessToken)
+    updatePayload(accessToken)
+  }
 })()

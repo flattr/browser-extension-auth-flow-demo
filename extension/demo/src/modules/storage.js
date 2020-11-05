@@ -7,10 +7,10 @@ export async function set (data) {
   return !chrome.runtime.lastError
 }
 
-export async function get (key) {
+export function get (key) {
   return new Promise(resolve => {
     chrome.storage.local.get([key], results => {
-      console.log(results[key])
+      console.log(key, results[key])
       resolve(results[key])
     })
   })
