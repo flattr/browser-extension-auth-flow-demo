@@ -59,7 +59,7 @@ async function updatePayload (accessToken) {
   }
 }
 
-async function onSubscription (data) {
+function onSubscription (data) {
   storage.set(data)
 }
 
