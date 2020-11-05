@@ -25,7 +25,6 @@ function onPopupOpenApps () {
 async function onToken (data) {
   const { accessToken, subscription } = data
   const isAuthenticated = await storage.set({ accessToken, subscription })
-  storage.get(ACCESS_TOKEN).then(console.log)
   sendMessage('popup-set-view', {
     isAuthenticated
   })
@@ -44,16 +43,13 @@ async function updatePayload (accessToken) {
   const payload = await storage.get(PAYLOAD)
   if (!payload) {
     const subscriptionStatus = await api.fetchSubscriptionStatus(accessToken)
-    console.log(subscriptionStatus)
     if (subscriptionStatus.hasOwnProperty(PAYLOAD)) {
       storage.set(subscriptionStatus)
     }
   } else {
     const ttl = await storage.get(TTL)
     if (ttl) {
-      let timeout = timeToLive(ttl)
-      console.log(timeout)
-      setTimeout(updatePayload.bind(null, accessToken), timeout)
+      setTimeout(updatePayload.bind(null, accessToken), timeToLive(ttl))
     }
   }
 }
@@ -79,7 +75,6 @@ async function onPopupCheckAuth () {
 
   const accessToken = await storage.get(ACCESS_TOKEN)
   if (accessToken) {
-    console.log(accessToken)
     updatePayload(accessToken)
   }
 })()

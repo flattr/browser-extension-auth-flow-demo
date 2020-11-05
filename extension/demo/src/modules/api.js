@@ -1,4 +1,5 @@
 'use strict'
+
 import { API_BASE } from './constants'
 
 export function fetchSubscriptionStatus (accessToken) {
