@@ -29,11 +29,9 @@ document.addEventListener('flattr-subscription', event => {
   sendMessage('subscription', { type: 'subscription', subscription })
 })
 
-document.addEventListener('flattr-request-payload', async event => {
-  const { payload } = await sendMessage('request-payload')
-
-  dispatchEvent('payload', {
-    payload: payload
-  })
-
+document.addEventListener('flattr-request-payload', async () => {
+  const { payload } = await sendMessage('request-payload', {})
+  if (payload) {
+    dispatchEvent('payload', { payload })
+  }
 })

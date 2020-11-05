@@ -3,7 +3,7 @@
 import browser from 'webextension-polyfill'
 
 import { addListener } from '../modules/messaging'
-import { ACCESS_TOKEN, PAYLOAD, TTL, API_BASE_WEB } from '../modules/constants'
+import { ACCESS_TOKEN, API_BASE_WEB, PAYLOAD, TTL } from '../modules/constants'
 import * as api from '../modules/api'
 import * as storage from '../modules/storage'
 
@@ -33,8 +33,10 @@ async function onToken (data) {
 }
 
 async function requestPayload () {
-  const payload = await storage.get(PAYLOAD)
-  return payload
+  let response = {}
+  response[PAYLOAD] = await storage.get(PAYLOAD)
+
+  return response
 }
 
 function timeToLive (expiresAt) {
