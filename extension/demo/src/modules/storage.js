@@ -1,7 +1,7 @@
 'use strict'
 
 export async function set (data) {
-  console.log(data)
+  console.table(data)
   await chrome.storage.local.set(data, console.log)
 
   return !chrome.runtime.lastError
@@ -10,7 +10,7 @@ export async function set (data) {
 export function get (key) {
   return new Promise(resolve => {
     chrome.storage.local.get([key], results => {
-      console.log(key, results[key])
+      console.log(key, ': ', results[key])
       resolve(results[key])
     })
   })

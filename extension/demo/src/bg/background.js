@@ -23,16 +23,12 @@ function onPopupOpenApps () {
 }
 
 async function onToken (data) {
-  const { accessToken, subscription } = data
-  const isAuthenticated = await storage.set({ accessToken, subscription })
-  sendMessage('popup-set-view', {
-    isAuthenticated
-  })
+  const { accessToken } = data
+  const isAuthenticated = await storage.set(data)
+  sendMessage('popup-set-view', { isAuthenticated })
   updatePayload(accessToken)
 
-  return {
-    isAuthenticated
-  }
+  return { isAuthenticated }
 }
 
 function timeToLive (expiresAt) {
@@ -55,8 +51,7 @@ async function updatePayload (accessToken) {
 }
 
 async function onSubscription (data) {
-  const { subscription } = data
-  await storage.set({ subscription })
+  await storage.set(data)
 }
 
 async function onPopupCheckAuth () {
