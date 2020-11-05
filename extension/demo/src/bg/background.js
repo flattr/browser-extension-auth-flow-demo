@@ -32,6 +32,11 @@ async function onToken (data) {
   return { isAuthenticated }
 }
 
+async function requestPayload () {
+  const payload = await storage.get(PAYLOAD)
+  return payload
+}
+
 function timeToLive (expiresAt) {
   return expiresAt - (Math.floor(Date.now() / 1000) + 3600)
 }
@@ -62,6 +67,7 @@ async function onPopupCheckAuth () {
 ;(async () => {
   addListener('token', onToken)
   addListener('subscription', onSubscription)
+  addListener('request-payload', requestPayload)
   addListener('popup-check-auth', onPopupCheckAuth)
   addListener('popup-trigger-auth', onPopupTriggerAuth)
   addListener('popup-open-apps', onPopupOpenApps)
