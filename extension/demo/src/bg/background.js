@@ -1,6 +1,7 @@
 'use strict'
 
-import { sendMessage, addListener } from '../modules/messaging'
+import browser from 'webextension-polyfill'
+import { addListener } from '../modules/messaging'
 import { ACCESS_TOKEN, PAYLOAD, TTL, API_BASE_WEB } from '../modules/constants'
 import * as api from '../modules/api'
 import * as storage from '../modules/storage'
@@ -8,7 +9,7 @@ import * as storage from '../modules/storage'
 async function onPopupTriggerAuth () {
   const accessToken = await storage.get(ACCESS_TOKEN)
   if (!accessToken) {
-    chrome.tabs.create({
+    browser.tabs.create({
       url: `${API_BASE_WEB}/oauth/ext`,
       active: true
     })
@@ -16,7 +17,7 @@ async function onPopupTriggerAuth () {
 }
 
 function onPopupOpenApps () {
-  chrome.tabs.create({
+  browser.tabs.create({
     url: `${API_BASE_WEB}/apps`,
     active: true
   })
@@ -25,7 +26,6 @@ function onPopupOpenApps () {
 async function onToken (data) {
   const { accessToken } = data
   const isAuthenticated = await storage.set(data)
-  sendMessage('popup-set-view', { isAuthenticated })
   updatePayload(accessToken)
 
   return { isAuthenticated }
@@ -55,10 +55,7 @@ async function onSubscription (data) {
 }
 
 async function onPopupCheckAuth () {
-  const accessToken = await storage.get(ACCESS_TOKEN)
-  sendMessage('popup-set-view', {
-    isAuthenticated: !!accessToken
-  })
+  return { isAuthenticated: !!await storage.get(ACCESS_TOKEN) }
 }
 
 ;(async () => {
