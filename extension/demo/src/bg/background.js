@@ -3,31 +3,15 @@
 import browser from 'webextension-polyfill'
 
 import { addListener } from '../modules/messaging'
-import { API_BASE, STORAGE_KEY } from '../modules/constants'
-
-async function getIsAuthenticated () {
-  const results = await browser.storage.local.get([STORAGE_KEY])
-  return !!results[STORAGE_KEY]
-}
-
-/**
- * @param {object} data Data to save to storage
- * @returns {Promise}
- */
-function updateStorage (data) {
-  const payload = {
-    [STORAGE_KEY]: {
-      auth: data
-    }
-  }
-  return browser.storage.local.set(payload)
-}
+import { ACCESS_TOKEN, API_BASE_WEB, PAYLOAD, TTL } from '../modules/constants'
+import * as api from '../modules/api'
+import * as storage from '../modules/storage'
 
 async function onPopupTriggerAuth () {
-  const isAuthenticated = await getIsAuthenticated()
-  if (!isAuthenticated) {
+  const accessToken = await storage.get(ACCESS_TOKEN)
+  if (!accessToken) {
     browser.tabs.create({
-      url: `${API_BASE}/oauth/ext`,
+      url: `${API_BASE_WEB}/oauth/ext`,
       active: true
     })
   }
@@ -35,32 +19,68 @@ async function onPopupTriggerAuth () {
 
 function onPopupOpenApps () {
   browser.tabs.create({
-    url: `${API_BASE}/apps`,
+    url: `${API_BASE_WEB}/apps`,
     active: true
   })
 }
 
 async function onToken (data) {
-  await updateStorage(data)
-  const isAuthenticated = !browser.runtime.lastError
-  return {
-    isAuthenticated
+  const { accessToken } = data
+  let isAuthenticated = false
+  try {
+    await storage.set(data)
+    isAuthenticated = true
+    updatePayload(accessToken)
+  } catch (e) {}
+
+  return { isAuthenticated }
+}
+
+async function requestPayload () {
+  const response = {}
+  response[PAYLOAD] = await storage.get(PAYLOAD)
+
+  return response
+}
+
+function timeToLive (expiresAt) {
+  return expiresAt - (Math.floor(Date.now() / 1000) + 3600)
+}
+
+async function updatePayload (accessToken) {
+  const payload = await storage.get(PAYLOAD)
+  if (!payload) {
+    const subscriptionStatus = await api.fetchSubscriptionStatus(accessToken)
+    if (subscriptionStatus.hasOwnProperty(PAYLOAD)) {
+      storage.set(subscriptionStatus)
+    }
+  } else {
+    const ttl = await storage.get(TTL)
+    if (ttl) {
+      const callback = () => updatePayload(accessToken)
+      setTimeout(callback, timeToLive(ttl))
+    }
   }
 }
 
 function onSubscription (data) {
-  updateStorage(data)
+  storage.set(data)
 }
 
 async function onPopupCheckAuth () {
-  const isAuthenticated = await getIsAuthenticated()
-  return {
-    isAuthenticated
-  }
+  return { isAuthenticated: !!await storage.get(ACCESS_TOKEN) }
 }
 
-addListener('token', onToken)
-addListener('subscription', onSubscription)
-addListener('popup-check-auth', onPopupCheckAuth)
-addListener('popup-trigger-auth', onPopupTriggerAuth)
-addListener('popup-open-apps', onPopupOpenApps)
+;(async () => {
+  addListener('token', onToken)
+  addListener('subscription', onSubscription)
+  addListener('request-payload', requestPayload)
+  addListener('popup-check-auth', onPopupCheckAuth)
+  addListener('popup-trigger-auth', onPopupTriggerAuth)
+  addListener('popup-open-apps', onPopupOpenApps)
+
+  const accessToken = await storage.get(ACCESS_TOKEN)
+  if (accessToken) {
+    updatePayload(accessToken)
+  }
+})()
