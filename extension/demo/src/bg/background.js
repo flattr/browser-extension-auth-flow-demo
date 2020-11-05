@@ -51,7 +51,8 @@ async function updatePayload (accessToken) {
   } else {
     const ttl = await storage.get(TTL)
     if (ttl) {
-      setTimeout(updatePayload.bind(null, accessToken), timeToLive(ttl))
+      const callback = () => updatePayload(accessToken)
+      setTimeout(callback, timeToLive(ttl))
     }
   }
 }
