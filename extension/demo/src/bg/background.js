@@ -33,7 +33,7 @@ async function onToken (data) {
 }
 
 async function requestPayload () {
-  let response = {}
+  const response = {}
   response[PAYLOAD] = await storage.get(PAYLOAD)
 
   return response
