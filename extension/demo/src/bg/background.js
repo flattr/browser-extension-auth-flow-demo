@@ -51,7 +51,7 @@ async function updatePayload (accessToken) {
 }
 
 async function onSubscription (data) {
-  await storage.set(data)
+  storage.set(data)
 }
 
 async function onPopupCheckAuth () {
