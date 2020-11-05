@@ -3,28 +3,22 @@
 import browser from 'webextension-polyfill'
 
 import { addListener } from '../modules/messaging'
+import * as api from '../modules/api'
+import * as storage from '../modules/storage'
 import {
-  API_BASE,
+  API_BASE_WEB,
   STORAGE_KEY_ACCESS_TOKEN,
   STORAGE_KEY_SUBSCRIPTION,
+  STORAGE_KEY_PAYLOAD,
+  STORAGE_KEY_TTL,
   STORAGE_KEY_EMIT_STATUS
 } from '../modules/constants'
 
-async function getIsAuthenticated () {
-  const results = await browser.storage.local.get([STORAGE_KEY_ACCESS_TOKEN])
-  return !!results[STORAGE_KEY_ACCESS_TOKEN]
-}
-
-async function getEmitStatus () {
-  const results = await browser.storage.local.get([STORAGE_KEY_EMIT_STATUS])
-  return !!results[STORAGE_KEY_EMIT_STATUS]
-}
-
 async function onPopupTriggerAuth () {
-  const isAuthenticated = await getIsAuthenticated()
-  if (!isAuthenticated) {
+  const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
+  if (!accessToken) {
     browser.tabs.create({
-      url: `${API_BASE}/oauth/ext`,
+      url: `${API_BASE_WEB}/oauth/ext`,
       active: true
     })
   }
@@ -32,7 +26,7 @@ async function onPopupTriggerAuth () {
 
 function onPopupOpenApps () {
   browser.tabs.create({
-    url: `${API_BASE}/apps`,
+    url: `${API_BASE_WEB}/apps`,
     active: true
   })
 }
@@ -44,18 +38,21 @@ function onSetEmitStatus (data) {
 }
 
 function onGetEmitStatus () {
-  return getEmitStatus()
+  return storage.get(STORAGE_KEY_EMIT_STATUS)
 }
 
 async function onSetTokenAndSubscription ({ accessToken, subscription }) {
-  await browser.storage.local.set({
+  const data = {
     [STORAGE_KEY_ACCESS_TOKEN]: accessToken,
     [STORAGE_KEY_SUBSCRIPTION]: subscription
-  })
-  const isAuthenticated = await getIsAuthenticated()
-  return {
-    isAuthenticated
   }
+  let isAuthenticated = false
+  try {
+    await storage.set(data)
+    isAuthenticated = true
+    updatePayload(accessToken)
+  } catch (e) {}
+  return { isAuthenticated }
 }
 
 function onSetSubscription (subscription) {
@@ -65,28 +62,59 @@ function onSetSubscription (subscription) {
 }
 
 async function onPopupSetup () {
-  const results = await browser.storage.local.get([STORAGE_KEY_EMIT_STATUS])
-  const hasEmitStatus = results.hasOwnProperty(STORAGE_KEY_EMIT_STATUS)
+  const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
+  let emitStatus = await storage.get(STORAGE_KEY_EMIT_STATUS)
+  const hasEmitStatus = emitStatus != null
 
   if (!hasEmitStatus) {
-    await browser.storage.local.set({
+    await storage.set({
       [STORAGE_KEY_EMIT_STATUS]: true
     })
+    emitStatus = true
   }
 
-  const isAuthenticated = await getIsAuthenticated()
-  const emitStatus = await getEmitStatus()
-
   return {
-    isAuthenticated,
+    isAuthenticated: !!accessToken,
     emitStatus
   }
 }
 
-addListener('set-token-and-subscription', onSetTokenAndSubscription)
-addListener('set-subscription', onSetSubscription)
-addListener('popup-setup', onPopupSetup)
-addListener('popup-trigger-auth', onPopupTriggerAuth)
-addListener('popup-open-apps', onPopupOpenApps)
-addListener('set-emit-status', onSetEmitStatus)
-addListener('get-emit-status', onGetEmitStatus)
+function onRequestPayload () {
+  return storage.get(STORAGE_KEY_PAYLOAD)
+}
+
+function timeToLive (expiresAt) {
+  return expiresAt - (Math.floor(Date.now() / 1000) + 3600)
+}
+
+async function updatePayload (accessToken) {
+  const payload = await storage.get(STORAGE_KEY_PAYLOAD)
+  if (!payload) {
+    const subscriptionStatus = await api.fetchSubscriptionStatus(accessToken)
+    if (subscriptionStatus.hasOwnProperty(STORAGE_KEY_PAYLOAD)) {
+      storage.set(subscriptionStatus)
+    }
+  } else {
+    const ttl = await storage.get(STORAGE_KEY_TTL)
+    if (ttl) {
+      const callback = () => updatePayload(accessToken)
+      setTimeout(callback, timeToLive(ttl))
+    }
+  }
+}
+
+;(async () => {
+  addListener('set-token-and-subscription', onSetTokenAndSubscription)
+  addListener('set-subscription', onSetSubscription)
+  addListener('popup-setup', onPopupSetup)
+  addListener('popup-trigger-auth', onPopupTriggerAuth)
+  addListener('popup-open-apps', onPopupOpenApps)
+  addListener('request-payload', onRequestPayload)
+  addListener('set-emit-status', onSetEmitStatus)
+  addListener('get-emit-status', onGetEmitStatus)
+
+  const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
+  if (accessToken) {
+    updatePayload(accessToken)
+  }
+})()

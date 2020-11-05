@@ -72,7 +72,7 @@ const init = () => {
     messageEl.innerText = message
     return
   }
-  
+
   // If we don't get a response we try again
   timer = setTimeout(init, 1000)
   tries++;

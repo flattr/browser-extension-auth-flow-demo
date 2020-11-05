@@ -29,11 +29,13 @@ document.addEventListener('flattr-subscription', event => {
   sendMessage('subscription', { type: 'subscription', subscription })
 })
 
-document.addEventListener('flattr-request-payload', async event => {
+// TODO: Should we send something else if there is no payload?
+// TODO: Should we send something else if there emitStatus is not true?
+// TODO: Move get-emit-status to request-payload?
+document.addEventListener('flattr-request-payload', async () => {
   const emitStatus = await sendMessage('get-emit-status')
-  if (!emitStatus) return // TODO: Should we send something else instead?
-  // TODO: Do stuff to get real payload...
-  dispatchEvent('payload', {
-    payload: 'eyJwYXlpbmciOnRydWUsInRzIjoxNjAzODczODMxfQ.p6V9Kt6nA8l7Bl656ZT4Y33OblczVkcufIQMAsDcLvBfsbvS5G26+OVA1J2Ltt7sKibiTkiY6WQL9m6/8awF+4aSL//fKc8Lh3kocJN4Hx0fBffH3PWtheCOPFpkFgndJF/Sk2lsscTMEp7mxXqVL3uTaHkbeUihL8c0miMRVbQ1zDyfyBQ611TNlvXaRQvy87OB1a9ytLSROv474crlTtDVVjVuW68keiIvJtGky5DVTGTn1F+Kac5ELBrWE1nUOmiLBVft5yAi40ZaOmSMiwyhFJRsb+VmPjncCjwBbEeHyw7Xx7q39/OPGSsVwNEAQ4K3XxDCTYFl380m+dDAcw'
-  })
+  const payload = await sendMessage('request-payload')
+  if (payload && emitStatus) {
+    dispatchEvent('payload', { payload })
+  }
 })

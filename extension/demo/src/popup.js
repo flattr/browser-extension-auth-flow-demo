@@ -18,7 +18,7 @@ function onLinkClick (event) {
   sendMessage('popup-open-apps')
 }
 
-function setToggle ({ isChecked }) {
+function setToggle (isChecked) {
   toggle.setAttribute('aria-checked', isChecked)
   toggle.removeAttribute('disabled')
 }
@@ -38,7 +38,7 @@ async function toggleEmitStatus () {
   }
 }
 
-function setView ({ isAuthenticated = false }) {
+function setView (isAuthenticated = false) {
   if (!isAuthenticated) {
     isNotAuthorized.style.display = 'block'
     isAuthorized.style.display = 'none'
@@ -56,6 +56,6 @@ addListener('popup-set-view', setView)
 
 ;(async () => {
   const { isAuthenticated, emitStatus } = await sendMessage('popup-setup')
-  setToggle({ isChecked })
-  setView({ isAuthenticated })
+  setToggle(emitStatus)
+  setView(isAuthenticated)
 })();
