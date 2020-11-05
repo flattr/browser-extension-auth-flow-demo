@@ -3,9 +3,7 @@
 import browser from 'webextension-polyfill'
 
 export async function set (data) {
-  await browser.storage.local.set(data)
-
-  return !browser.runtime.lastError
+  return await browser.storage.local.set(data)
 }
 
 export async function get (key) {

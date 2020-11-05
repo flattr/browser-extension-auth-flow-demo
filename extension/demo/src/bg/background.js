@@ -26,8 +26,12 @@ function onPopupOpenApps () {
 
 async function onToken (data) {
   const { accessToken } = data
-  const isAuthenticated = await storage.set(data)
-  updatePayload(accessToken)
+  let isAuthenticated = false
+  try {
+    await storage.set(data)
+    isAuthenticated = true
+    updatePayload(accessToken)
+  } catch (e) {}
 
   return { isAuthenticated }
 }
