@@ -1,6 +1,7 @@
 'use strict'
 
 import browser from 'webextension-polyfill'
+
 import { addListener } from '../modules/messaging'
 import { ACCESS_TOKEN, PAYLOAD, TTL, API_BASE_WEB } from '../modules/constants'
 import * as api from '../modules/api'

@@ -1,23 +1,25 @@
 'use strict'
 
+import browser from 'webextension-polyfill'
+
 export async function set (data) {
   console.table(data)
-  await chrome.storage.local.set(data, console.log)
+  const results = await browser.storage.local.set(data)
+  console.table(results)
 
-  return !chrome.runtime.lastError
+  return !browser.runtime.lastError
 }
 
 export function get (key) {
-  return new Promise(resolve => {
-    chrome.storage.local.get([key], results => {
-      console.log(key, ': ', results[key])
-      resolve(results[key])
-    })
+  return new Promise(async resolve => {
+    const results = await browser.storage.local.get([key])
+    console.log(key, ': ', results[key])
+    resolve(results[key])
   })
 }
 
 export async function remove (key) {
-  await chrome.storage.local.remove(key)
+  await browser.storage.local.remove(key)
 
-  return !chrome.runtime.lastError
+  return !browser.runtime.lastError
 }
