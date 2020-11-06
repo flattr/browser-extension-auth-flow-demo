@@ -15,7 +15,7 @@ import {
 } from '../modules/constants'
 
 async function onPopupTriggerAuth () {
-  const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
+  const accessToken = await storage.getSingle(STORAGE_KEY_ACCESS_TOKEN)
   if (!accessToken) {
     browser.tabs.create({
       url: `${API_BASE_WEB}/oauth/ext`,
@@ -35,10 +35,6 @@ function onSetSendPayload (data) {
   return storage.set({
     [STORAGE_KEY_SEND_PAYLOAD]: data
   })
-}
-
-function onGetSendPayload () {
-  return storage.get(STORAGE_KEY_SEND_PAYLOAD)
 }
 
 async function onSetTokenAndSubscription ({ accessToken, subscription }) {
@@ -62,10 +58,15 @@ function onSetSubscription (subscription) {
 }
 
 async function onPopupSetup () {
-  const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
-  let sendPayload = await storage.get(STORAGE_KEY_SEND_PAYLOAD)
-  const hasSendPayload = sendPayload != null
+  const data = await storage.get([
+    STORAGE_KEY_ACCESS_TOKEN,
+    STORAGE_KEY_SEND_PAYLOAD
+  ])
 
+  const isAuthenticated = !!data[STORAGE_KEY_ACCESS_TOKEN]
+  let sendPayload = data[STORAGE_KEY_SEND_PAYLOAD]
+
+  const hasSendPayload = sendPayload != null
   if (!hasSendPayload) {
     await storage.set({
       [STORAGE_KEY_SEND_PAYLOAD]: true
@@ -74,13 +75,23 @@ async function onPopupSetup () {
   }
 
   return {
-    isAuthenticated: !!accessToken,
+    isAuthenticated,
     sendPayload
   }
 }
 
-function onRequestPayload () {
-  return storage.get(STORAGE_KEY_PAYLOAD)
+// TODO: Should we send something else if sendPayload is not true?
+async function onRequestPayload () {
+  const data = await storage.get([
+    STORAGE_KEY_SEND_PAYLOAD,
+    STORAGE_KEY_PAYLOAD
+  ])
+  if (
+    data[STORAGE_KEY_SEND_PAYLOAD]
+  ) {
+    return data[STORAGE_KEY_PAYLOAD]
+  }
+  return null
 }
 
 function timeToLive (expiresAt) {
@@ -88,14 +99,14 @@ function timeToLive (expiresAt) {
 }
 
 async function updatePayload (accessToken) {
-  const payload = await storage.get(STORAGE_KEY_PAYLOAD)
+  const payload = await storage.getSingle(STORAGE_KEY_PAYLOAD)
   if (!payload) {
     const subscriptionStatus = await api.fetchSubscriptionStatus(accessToken)
     if (subscriptionStatus.hasOwnProperty(STORAGE_KEY_PAYLOAD)) {
       storage.set(subscriptionStatus)
     }
   } else {
-    const ttl = await storage.get(STORAGE_KEY_TTL)
+    const ttl = await storage.getSingle(STORAGE_KEY_TTL)
     if (ttl) {
       const callback = () => updatePayload(accessToken)
       setTimeout(callback, timeToLive(ttl))
@@ -111,9 +122,8 @@ async function updatePayload (accessToken) {
   addListener('popup-open-apps', onPopupOpenApps)
   addListener('request-payload', onRequestPayload)
   addListener('set-send-payload', onSetSendPayload)
-  addListener('get-send-payload', onGetSendPayload)
 
-  const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
+  const accessToken = await storage.getSingle(STORAGE_KEY_ACCESS_TOKEN)
   if (accessToken) {
     updatePayload(accessToken)
   }
