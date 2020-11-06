@@ -32,7 +32,7 @@ function onPopupOpenApps () {
 }
 
 function onSetSendPayload (data) {
-  return browser.storage.local.set({
+  return storage.set({
     [STORAGE_KEY_SEND_PAYLOAD]: data
   })
 }
@@ -56,7 +56,7 @@ async function onSetTokenAndSubscription ({ accessToken, subscription }) {
 }
 
 function onSetSubscription (subscription) {
-  return browser.storage.local.set({
+  return storage.set({
     [STORAGE_KEY_SUBSCRIPTION]: subscription
   })
 }
