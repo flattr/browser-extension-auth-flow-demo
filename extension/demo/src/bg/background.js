@@ -11,7 +11,7 @@ import {
   STORAGE_KEY_SUBSCRIPTION,
   STORAGE_KEY_PAYLOAD,
   STORAGE_KEY_TTL,
-  STORAGE_KEY_EMIT_STATUS
+  STORAGE_KEY_SEND_PAYLOAD
 } from '../modules/constants'
 
 async function onPopupTriggerAuth () {
@@ -31,14 +31,14 @@ function onPopupOpenApps () {
   })
 }
 
-function onSetEmitStatus (data) {
+function onSetSendPayload (data) {
   return browser.storage.local.set({
-    [STORAGE_KEY_EMIT_STATUS]: data
+    [STORAGE_KEY_SEND_PAYLOAD]: data
   })
 }
 
-function onGetEmitStatus () {
-  return storage.get(STORAGE_KEY_EMIT_STATUS)
+function onGetSendPayload () {
+  return storage.get(STORAGE_KEY_SEND_PAYLOAD)
 }
 
 async function onSetTokenAndSubscription ({ accessToken, subscription }) {
@@ -63,19 +63,19 @@ function onSetSubscription (subscription) {
 
 async function onPopupSetup () {
   const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
-  let emitStatus = await storage.get(STORAGE_KEY_EMIT_STATUS)
-  const hasEmitStatus = emitStatus != null
+  let sendPayload = await storage.get(STORAGE_KEY_SEND_PAYLOAD)
+  const hasSendPayload = sendPayload != null
 
-  if (!hasEmitStatus) {
+  if (!hasSendPayload) {
     await storage.set({
-      [STORAGE_KEY_EMIT_STATUS]: true
+      [STORAGE_KEY_SEND_PAYLOAD]: true
     })
-    emitStatus = true
+    sendPayload = true
   }
 
   return {
     isAuthenticated: !!accessToken,
-    emitStatus
+    sendPayload
   }
 }
 
@@ -110,8 +110,8 @@ async function updatePayload (accessToken) {
   addListener('popup-trigger-auth', onPopupTriggerAuth)
   addListener('popup-open-apps', onPopupOpenApps)
   addListener('request-payload', onRequestPayload)
-  addListener('set-emit-status', onSetEmitStatus)
-  addListener('get-emit-status', onGetEmitStatus)
+  addListener('set-send-payload', onSetSendPayload)
+  addListener('get-send-payload', onGetSendPayload)
 
   const accessToken = await storage.get(STORAGE_KEY_ACCESS_TOKEN)
   if (accessToken) {

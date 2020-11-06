@@ -23,13 +23,13 @@ function setToggle (isChecked) {
   toggle.removeAttribute('disabled')
 }
 
-async function toggleEmitStatus () {
+async function toggleSendPayload () {
   const oldValue = toggle.getAttribute('aria-checked') === 'true'
   const newValue = !oldValue
   toggle.setAttribute('aria-checked', newValue)
   toggle.setAttribute('disabled', true)
   try {
-    await sendMessage('set-emit-status', newValue)
+    await sendMessage('set-send-payload', newValue)
   } catch (error) {
     toggle.setAttribute('aria-checked', oldValue)
     throw error
@@ -50,12 +50,12 @@ function setView (isAuthenticated = false) {
 
 button.addEventListener('click', onButtonClick)
 link.addEventListener('click', onLinkClick)
-toggle.addEventListener('click', toggleEmitStatus)
+toggle.addEventListener('click', toggleSendPayload)
 
 addListener('popup-set-view', setView)
 
 ;(async () => {
-  const { isAuthenticated, emitStatus } = await sendMessage('popup-setup')
-  setToggle(emitStatus)
+  const { isAuthenticated, sendPayload } = await sendMessage('popup-setup')
+  setToggle(sendPayload)
   setView(isAuthenticated)
 })();

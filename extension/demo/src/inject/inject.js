@@ -30,12 +30,12 @@ document.addEventListener('flattr-subscription', event => {
 })
 
 // TODO: Should we send something else if there is no payload?
-// TODO: Should we send something else if there emitStatus is not true?
-// TODO: Move get-emit-status to request-payload?
+// TODO: Should we send something else if there sendPayload is not true?
+// TODO: Move get-send-payload to request-payload?
 document.addEventListener('flattr-request-payload', async () => {
-  const emitStatus = await sendMessage('get-emit-status')
+  const sendPayload = await sendMessage('get-send-payload')
   const payload = await sendMessage('request-payload')
-  if (payload && emitStatus) {
+  if (payload && sendPayload) {
     dispatchEvent('payload', { payload })
   }
 })
