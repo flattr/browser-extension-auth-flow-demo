@@ -11,7 +11,7 @@ Example response:
 
 ```json
 {
-  "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWOQXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
+  "payload": "Gwx7MU+Nmh4tBVhhGeoXjoWO.QXrsgqTWgMI+QwuWrWfF0aJ4OAMB5zyJKpA9+pTTGJzP6rVEzZw"
 }
 ```
 
