@@ -32,9 +32,7 @@ function onPopupOpenApps () {
 }
 
 function onSetEmitStatus (data) {
-  return browser.storage.local.set({
-    [STORAGE_KEY_EMIT_STATUS]: data
-  })
+  return storage.set({ [STORAGE_KEY_EMIT_STATUS]: data })
 }
 
 function onGetEmitStatus () {
@@ -56,9 +54,7 @@ async function onSetTokenAndSubscription ({ accessToken, subscription }) {
 }
 
 function onSetSubscription (subscription) {
-  return browser.storage.local.set({
-    [STORAGE_KEY_SUBSCRIPTION]: subscription
-  })
+  return storage.set({ [STORAGE_KEY_SUBSCRIPTION]: subscription })
 }
 
 async function onPopupSetup () {
