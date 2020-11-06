@@ -10,10 +10,12 @@
 1. Run build script
 
     ```bash
-    npm run watch
+    npm run watch:dev
     # or
-    npm run build
+    npm run build:dev
     ```
 
-1. Load `/dist` as unpacked in your browser.
+    Change "dev" to "prod" if you want to run the API against flattr.com instead of flattr.test.
+
+1. Load `/dist` as an unpacked extension in your browser.
 1. Success!
