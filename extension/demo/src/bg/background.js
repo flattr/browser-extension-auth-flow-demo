@@ -51,12 +51,6 @@ async function onSetTokenAndSubscription ({ accessToken, subscription }) {
   return { isAuthenticated }
 }
 
-function onSetSubscription (subscription) {
-  return storage.set({
-    [STORAGE_KEY_SUBSCRIPTION]: subscription
-  })
-}
-
 async function onPopupSetup () {
   const data = await storage.get([
     STORAGE_KEY_ACCESS_TOKEN,
@@ -116,7 +110,6 @@ async function updatePayload (accessToken) {
 
 ;(async () => {
   addListener('set-token-and-subscription', onSetTokenAndSubscription)
-  addListener('set-subscription', onSetSubscription)
   addListener('popup-setup', onPopupSetup)
   addListener('popup-trigger-auth', onPopupTriggerAuth)
   addListener('popup-open-apps', onPopupOpenApps)
