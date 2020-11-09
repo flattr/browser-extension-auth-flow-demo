@@ -63,10 +63,9 @@ const messageEl = document.getElementById('message')
 let timer = null
 let tries = 0
 
-// TODO: Request a real payload from the extension and only verify if it is returned
 // TODO: We need a better way to wait for the extension to be ready
 const init = () => {
-  let message = 'No Flattr extension detected. ☹️'
+  let message = 'No Flattr extension detected. 😕'
 
   if (tries > 10) {
     messageEl.innerText = message

@@ -2,9 +2,12 @@
 
 import { addListener, sendMessage } from './modules/messaging'
 
+const isNotAuthorized = document.getElementById('is-not-authorized')
 const button = document.getElementById('auth-button')
-const message = document.getElementById('auth-message')
 const link = document.getElementById('manage-link')
+
+const isAuthorized = document.getElementById('is-authorized')
+const toggle = document.getElementById('toggle')
 
 function onButtonClick () {
   sendMessage('popup-trigger-auth')
@@ -15,22 +18,44 @@ function onLinkClick (event) {
   sendMessage('popup-open-apps')
 }
 
-function setView ({ isAuthenticated = false }) {
+function setToggle (isChecked) {
+  toggle.setAttribute('aria-checked', isChecked)
+  toggle.removeAttribute('disabled')
+}
+
+async function toggleSendPayload () {
+  const oldValue = toggle.getAttribute('aria-checked') === 'true'
+  const newValue = !oldValue
+  toggle.setAttribute('aria-checked', newValue)
+  toggle.setAttribute('disabled', true)
+  try {
+    await sendMessage('set-send-payload', newValue)
+  } catch (error) {
+    toggle.setAttribute('aria-checked', oldValue)
+    throw error
+  } finally {
+    toggle.removeAttribute('disabled')
+  }
+}
+
+function setView (isAuthenticated = false) {
   if (!isAuthenticated) {
-    button.style.display = 'block'
-    message.style.display = 'none'
+    isNotAuthorized.style.display = 'block'
+    isAuthorized.style.display = 'none'
   } else {
-    message.style.display = 'block'
-    button.style.display = 'none'
+    isAuthorized.style.display = 'block'
+    isNotAuthorized.style.display = 'none'
   }
 }
 
 button.addEventListener('click', onButtonClick)
 link.addEventListener('click', onLinkClick)
+toggle.addEventListener('click', toggleSendPayload)
 
 addListener('popup-set-view', setView)
 
 ;(async () => {
-  const response = await sendMessage('popup-check-auth')
-  setView(response)
+  const { isAuthenticated, sendPayload } = await sendMessage('popup-setup')
+  setToggle(sendPayload)
+  setView(isAuthenticated)
 })();

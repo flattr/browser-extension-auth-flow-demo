@@ -20,7 +20,7 @@ export function addListener (key, callback) {
  * @param {object} data Data to send with the message
  * @returns {Promise} Promise that is resolved with response of the listener
  */
-export function sendMessage (key, data) {
+export function sendMessage (key, data = {}) {
   const payload = {
     key,
     data

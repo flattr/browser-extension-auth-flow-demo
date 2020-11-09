@@ -3,12 +3,19 @@
 import browser from 'webextension-polyfill'
 
 import { addListener } from '../modules/messaging'
-import { ACCESS_TOKEN, API_BASE_WEB, PAYLOAD, TTL } from '../modules/constants'
 import * as api from '../modules/api'
 import * as storage from '../modules/storage'
+import {
+  API_BASE_WEB,
+  STORAGE_KEY_ACCESS_TOKEN,
+  STORAGE_KEY_SUBSCRIPTION,
+  STORAGE_KEY_PAYLOAD,
+  STORAGE_KEY_TTL,
+  STORAGE_KEY_SEND_PAYLOAD
+} from '../modules/constants'
 
 async function onPopupTriggerAuth () {
-  const accessToken = await storage.get(ACCESS_TOKEN)
+  const accessToken = await storage.getSingle(STORAGE_KEY_ACCESS_TOKEN)
   if (!accessToken) {
     browser.tabs.create({
       url: `${API_BASE_WEB}/oauth/ext`,
@@ -24,23 +31,67 @@ function onPopupOpenApps () {
   })
 }
 
-async function onToken (data) {
-  const { accessToken } = data
+function onSetSendPayload (data) {
+  return storage.set({
+    [STORAGE_KEY_SEND_PAYLOAD]: data
+  })
+}
+
+async function onSetTokenAndSubscription ({ accessToken, subscription }) {
+  const data = {
+    [STORAGE_KEY_ACCESS_TOKEN]: accessToken,
+    [STORAGE_KEY_SUBSCRIPTION]: subscription
+  }
   let isAuthenticated = false
   try {
     await storage.set(data)
     isAuthenticated = true
     updatePayload(accessToken)
   } catch (e) {}
-
   return { isAuthenticated }
 }
 
-async function requestPayload () {
-  const response = {}
-  response[PAYLOAD] = await storage.get(PAYLOAD)
+function onSetSubscription (subscription) {
+  return storage.set({
+    [STORAGE_KEY_SUBSCRIPTION]: subscription
+  })
+}
 
-  return response
+async function onPopupSetup () {
+  const data = await storage.get([
+    STORAGE_KEY_ACCESS_TOKEN,
+    STORAGE_KEY_SEND_PAYLOAD
+  ])
+
+  const isAuthenticated = !!data[STORAGE_KEY_ACCESS_TOKEN]
+  let sendPayload = data[STORAGE_KEY_SEND_PAYLOAD]
+
+  const hasSendPayload = sendPayload != null
+  if (!hasSendPayload) {
+    await storage.set({
+      [STORAGE_KEY_SEND_PAYLOAD]: true
+    })
+    sendPayload = true
+  }
+
+  return {
+    isAuthenticated,
+    sendPayload
+  }
+}
+
+// TODO: Should we send something else if sendPayload is not true?
+async function onRequestPayload () {
+  const data = await storage.get([
+    STORAGE_KEY_SEND_PAYLOAD,
+    STORAGE_KEY_PAYLOAD
+  ])
+  if (
+    data[STORAGE_KEY_SEND_PAYLOAD]
+  ) {
+    return data[STORAGE_KEY_PAYLOAD]
+  }
+  return null
 }
 
 function timeToLive (expiresAt) {
@@ -48,14 +99,14 @@ function timeToLive (expiresAt) {
 }
 
 async function updatePayload (accessToken) {
-  const payload = await storage.get(PAYLOAD)
+  const payload = await storage.getSingle(STORAGE_KEY_PAYLOAD)
   if (!payload) {
     const subscriptionStatus = await api.fetchSubscriptionStatus(accessToken)
-    if (subscriptionStatus.hasOwnProperty(PAYLOAD)) {
+    if (subscriptionStatus.hasOwnProperty(STORAGE_KEY_PAYLOAD)) {
       storage.set(subscriptionStatus)
     }
   } else {
-    const ttl = await storage.get(TTL)
+    const ttl = await storage.getSingle(STORAGE_KEY_TTL)
     if (ttl) {
       const callback = () => updatePayload(accessToken)
       setTimeout(callback, timeToLive(ttl))
@@ -63,23 +114,16 @@ async function updatePayload (accessToken) {
   }
 }
 
-function onSubscription (data) {
-  storage.set(data)
-}
-
-async function onPopupCheckAuth () {
-  return { isAuthenticated: !!await storage.get(ACCESS_TOKEN) }
-}
-
 ;(async () => {
-  addListener('token', onToken)
-  addListener('subscription', onSubscription)
-  addListener('request-payload', requestPayload)
-  addListener('popup-check-auth', onPopupCheckAuth)
+  addListener('set-token-and-subscription', onSetTokenAndSubscription)
+  addListener('set-subscription', onSetSubscription)
+  addListener('popup-setup', onPopupSetup)
   addListener('popup-trigger-auth', onPopupTriggerAuth)
   addListener('popup-open-apps', onPopupOpenApps)
+  addListener('request-payload', onRequestPayload)
+  addListener('set-send-payload', onSetSendPayload)
 
-  const accessToken = await storage.get(ACCESS_TOKEN)
+  const accessToken = await storage.getSingle(STORAGE_KEY_ACCESS_TOKEN)
   if (accessToken) {
     updatePayload(accessToken)
   }

@@ -4,29 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Popup</title>
+    <link rel="stylesheet" href="normalize.css">
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <button
-      id="auth-button"
-      type="button"
-      class="button"
+    <div
+      id="is-not-authorized"
       style="display: none;"
     >
-      Authorize extension
-    </button>
-    <p
-      id="auth-message"
+      <p
+        class="text-center mb-4"
+      >
+        Extension is not yet authorized.
+      </p>
+      <button
+        id="auth-button"
+        type="button"
+        class="button"
+      >
+        Authorize extension
+      </button>
+    </div>
+    <div
+      id="is-authorized"
       style="display: none;"
     >
-      Extension is authorized! 🎉
-      <br>
-      <a
-        id="manage-link"
-        href="https://flattr.com/apps"
-        class="link"
-      >Manage access tokens</a>
-    </p>
+      <p
+        class="mb-4"
+      >
+        Extension is authorized! 🎉
+        <br>
+        <a
+          id="manage-link"
+          href="https://flattr.com/apps"
+          class="link"
+        >Manage access tokens</a>
+      </p>
+      <div
+        class="toggle"
+      >
+        <label
+          for="toggle"
+          class="toggle__label"
+        >
+          Send my subscription status to authorized websites
+        </label>
+        <button
+          id="toggle"
+          type="button"
+          role="switch"
+          class="toggle__button"
+          aria-checked="false"
+          disabled="true"
+        ></button>
+      </div>
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>

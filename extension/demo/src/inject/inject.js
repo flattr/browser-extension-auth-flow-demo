@@ -15,7 +15,7 @@ document.addEventListener('flattr-trigger', event => {
 
 document.addEventListener('flattr-token', async event => {
   const { accessToken, subscription } = event.detail
-  const { isAuthenticated } = await sendMessage('token', { accessToken, subscription })
+  const { isAuthenticated } = await sendMessage('set-token-and-subscription', { accessToken, subscription })
   dispatchEvent('authenticated', {
     authenticated: isAuthenticated
   })
@@ -29,8 +29,9 @@ document.addEventListener('flattr-subscription', event => {
   sendMessage('subscription', { type: 'subscription', subscription })
 })
 
+// TODO: Should we send something else if there is no payload?
 document.addEventListener('flattr-request-payload', async () => {
-  const { payload } = await sendMessage('request-payload', {})
+  const payload = await sendMessage('request-payload')
   if (payload) {
     dispatchEvent('payload', { payload })
   }

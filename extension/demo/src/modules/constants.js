@@ -2,12 +2,13 @@
 
 const env = process.env.TARGET_ENV
 
-export const ACCESS_TOKEN = 'accessToken'
-export const SUBSCRIPTION = 'subscription'
-export const IS_PAYING = 'isPaying'
-export const PAYLOAD = 'payload'
-export const TTL = 'expiresAt'
 const apiDomain = env === 'production' ? 'flattr.com' : 'flattr.test'
 const apiProtocol = env === 'production' ? 'https' : 'http'
 export const API_BASE = `${apiProtocol}://api.${apiDomain}`
 export const API_BASE_WEB = `${apiProtocol}://${apiDomain}`
+
+export const STORAGE_KEY_ACCESS_TOKEN = 'accessToken'
+export const STORAGE_KEY_SUBSCRIPTION = 'subscription'
+export const STORAGE_KEY_SEND_PAYLOAD = 'sendPayload'
+export const STORAGE_KEY_PAYLOAD = 'payload'
+export const STORAGE_KEY_TTL = 'expiresAt'
