@@ -15,13 +15,19 @@ document.addEventListener('flattr-trigger', event => {
 
 document.addEventListener('flattr-token', async event => {
   const { accessToken, subscription } = event.detail
-  const { isAuthenticated } = await sendMessage('set-token-and-subscription', { accessToken, subscription })
-  dispatchEvent('authenticated', {
-    authenticated: isAuthenticated
-  })
-  sendMessage('popup-set-view', {
-    isAuthenticated
-  })
+  let isAuthenticated = false
+  sendMessage('set-token-and-subscription', { accessToken, subscription })
+    .then(() => {
+      isAuthenticated = true
+    })
+    .finally(() => {
+      dispatchEvent('authenticated', {
+        authenticated: isAuthenticated
+      })
+      sendMessage('popup-set-view', {
+        isAuthenticated
+      })
+    })
 })
 
 document.addEventListener('flattr-subscription', event => {
@@ -32,7 +38,5 @@ document.addEventListener('flattr-subscription', event => {
 // TODO: Should we send something else if there is no payload?
 document.addEventListener('flattr-request-payload', async () => {
   const payload = await sendMessage('request-payload')
-  if (payload) {
-    dispatchEvent('payload', { payload })
-  }
+  dispatchEvent('payload', { payload })
 })

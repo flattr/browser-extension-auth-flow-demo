@@ -13,5 +13,8 @@ export async function fetchSubscriptionStatus (accessToken) {
       }
     }
   )
+  if (!response.ok) {
+    throw new Error(`HTTP error! ${response.status} (${response.statusText})`)
+  }
   return response.json()
 }
