@@ -63,6 +63,7 @@ const messageEl = document.getElementById('message')
 let timer = null
 let tries = 0
 
+// TODO: We're not checking if the payload is null. This all needs to be better handled.
 // TODO: We need a better way to wait for the extension to be ready
 const init = () => {
   let message = 'No Flattr extension detected. 😕'

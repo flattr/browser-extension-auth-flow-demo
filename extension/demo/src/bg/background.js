@@ -10,7 +10,7 @@ import {
   STORAGE_KEY_ACCESS_TOKEN,
   STORAGE_KEY_SUBSCRIPTION,
   STORAGE_KEY_PAYLOAD,
-  STORAGE_KEY_TTL,
+  STORAGE_KEY_EXPIRES_AT,
   STORAGE_KEY_SEND_PAYLOAD
 } from '../modules/constants'
 
@@ -42,13 +42,8 @@ async function onSetTokenAndSubscription ({ accessToken, subscription }) {
     [STORAGE_KEY_ACCESS_TOKEN]: accessToken,
     [STORAGE_KEY_SUBSCRIPTION]: subscription
   }
-  let isAuthenticated = false
-  try {
-    await storage.set(data)
-    isAuthenticated = true
-    updatePayload(accessToken)
-  } catch (e) {}
-  return { isAuthenticated }
+  await storage.set(data)
+  return updatePayload(accessToken)
 }
 
 function onSetSubscription (subscription) {
@@ -83,34 +78,41 @@ async function onPopupSetup () {
 // TODO: Should we send something else if sendPayload is not true?
 async function onRequestPayload () {
   const data = await storage.get([
-    STORAGE_KEY_SEND_PAYLOAD,
-    STORAGE_KEY_PAYLOAD
+    STORAGE_KEY_ACCESS_TOKEN,
+    STORAGE_KEY_PAYLOAD,
+    STORAGE_KEY_EXPIRES_AT
   ])
-  if (
-    data[STORAGE_KEY_SEND_PAYLOAD]
-  ) {
-    return data[STORAGE_KEY_PAYLOAD]
+  const isExpired = hasExpired(data[STORAGE_KEY_EXPIRES_AT])
+  if (isExpired) {
+    await updatePayload(data[STORAGE_KEY_ACCESS_TOKEN])
   }
-  return null
+  // TODO: Throw an exception instead?
+  if (!data[STORAGE_KEY_SEND_PAYLOAD]) return null
+  return data[STORAGE_KEY_PAYLOAD]
 }
 
-function timeToLive (expiresAt) {
-  return expiresAt - (Math.floor(Date.now() / 1000) + 3600)
+function hasExpired (time) {
+  const expiresAt = time || 0
+  const now = Math.floor(Date.now() / 1000)
+  const oneHour = 3600
+  // We add an hour as a convenience for the user
+  const remaining = expiresAt - (now + oneHour)
+  return remaining < 0
 }
 
 async function updatePayload (accessToken) {
-  const payload = await storage.getSingle(STORAGE_KEY_PAYLOAD)
-  if (!payload) {
-    const subscriptionStatus = await api.fetchSubscriptionStatus(accessToken)
-    if (subscriptionStatus.hasOwnProperty(STORAGE_KEY_PAYLOAD)) {
-      storage.set(subscriptionStatus)
-    }
-  } else {
-    const ttl = await storage.getSingle(STORAGE_KEY_TTL)
-    if (ttl) {
-      const callback = () => updatePayload(accessToken)
-      setTimeout(callback, timeToLive(ttl))
-    }
+  try {
+    const results = await api.fetchSubscriptionStatus(accessToken)
+    storage.set({
+      [STORAGE_KEY_PAYLOAD]: results[STORAGE_KEY_PAYLOAD] || null,
+      [STORAGE_KEY_EXPIRES_AT]: results[STORAGE_KEY_EXPIRES_AT] || null
+    })
+  } catch (error) {
+    return storage.set({
+      [STORAGE_KEY_ACCESS_TOKEN]: null,
+      [STORAGE_KEY_PAYLOAD]: null,
+      [STORAGE_KEY_EXPIRES_AT]: null
+    })
   }
 }
 

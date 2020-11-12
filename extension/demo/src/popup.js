@@ -38,6 +38,7 @@ async function toggleSendPayload () {
   }
 }
 
+// TODO: Change browser_action if unauthenticated
 function setView (isAuthenticated = false) {
   if (!isAuthenticated) {
     isNotAuthorized.style.display = 'block'
