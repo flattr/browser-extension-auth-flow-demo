@@ -8,7 +8,6 @@ import * as storage from '../modules/storage'
 import {
   API_BASE_WEB,
   STORAGE_KEY_ACCESS_TOKEN,
-  STORAGE_KEY_SUBSCRIPTION,
   STORAGE_KEY_PAYLOAD,
   STORAGE_KEY_TTL,
   STORAGE_KEY_SEND_PAYLOAD
@@ -37,24 +36,16 @@ function onSetSendPayload (data) {
   })
 }
 
-async function onSetTokenAndSubscription ({ accessToken, subscription }) {
-  const data = {
-    [STORAGE_KEY_ACCESS_TOKEN]: accessToken,
-    [STORAGE_KEY_SUBSCRIPTION]: subscription
-  }
+async function onSetToken (accessToken) {
   let isAuthenticated = false
   try {
-    await storage.set(data)
+    await storage.set({
+      [STORAGE_KEY_ACCESS_TOKEN]: accessToken
+    })
     isAuthenticated = true
     updatePayload(accessToken)
   } catch (e) {}
   return { isAuthenticated }
-}
-
-function onSetSubscription (subscription) {
-  return storage.set({
-    [STORAGE_KEY_SUBSCRIPTION]: subscription
-  })
 }
 
 async function onPopupSetup () {
@@ -115,8 +106,7 @@ async function updatePayload (accessToken) {
 }
 
 ;(async () => {
-  addListener('set-token-and-subscription', onSetTokenAndSubscription)
-  addListener('set-subscription', onSetSubscription)
+  addListener('set-token', onSetToken)
   addListener('popup-setup', onPopupSetup)
   addListener('popup-trigger-auth', onPopupTriggerAuth)
   addListener('popup-open-apps', onPopupOpenApps)
